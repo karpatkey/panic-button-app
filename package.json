@@ -24,7 +24,7 @@
     "@emotion/styled": "^11.11.0",
     "@google-cloud/bigquery": "^7.3.0",
     "@mui/icons-material": "5.14.8",
-    "@mui/material": "5.14.8",
+    "@mui/material": "5.14.12",
     "clsx": "^2.0.0",
     "dotenv": "^16.3.1",
     "framer-motion": "^10.16.4",
