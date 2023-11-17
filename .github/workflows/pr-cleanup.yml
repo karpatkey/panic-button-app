@@ -6,6 +6,7 @@ on:
       - develop
     types:
       - closed
+      - synchronize
 
 jobs:
   delete-pr-deployment:
