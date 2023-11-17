@@ -1,0 +1,36 @@
+name: Comment
+
+on:
+  workflow_run:
+    workflows: ["PR Deployment CI/CD"]
+    types:
+      - completed
+  pull_request:
+    branches:
+      - develop
+    types:
+      - opened
+
+jobs:
+  Comment:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Set Deployment URL
+      id: set-url
+      run: | 
+        PR_NUMBER=${{ github.event.pull_request.number }}
+        echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+        DEPLOYMENT_URL="https://${PR_NUMBER}-pr.karpatkey.dev"
+        echo "DEPLOYMENT_URL=${DEPLOYMENT_URL}" >> $GITHUB_ENV
+        
+    - name: Comment on PR
+      run: |
+        curl -X POST \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/repos/karpatkey/panic-button-app/issues/${{ github.event.pull_request.number }}/comments" \
+          -d "{\"body\":\"Deployment URL: $DEPLOYMENT_URL\"}"
