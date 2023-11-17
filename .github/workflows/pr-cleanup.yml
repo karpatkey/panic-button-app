@@ -10,6 +10,7 @@ on:
 
 jobs:
   delete-pr-deployment:
+    if: (github.event.pull_request.merged == true || github.event_name == 'closed') && github.repository == 'karpatkey/panic-button-app' && github.event.pull_request.base.ref == 'develop' && github.event.pull_request.head.sha
     runs-on: self-hosted
     steps:
     - name: Checkout code
@@ -27,8 +28,6 @@ jobs:
     - name: Run Deployment or Deletion Script
       run: |
         PR_SHA=$(echo ${{ github.event.after }})
+        ./delete-deployment-script.sh $PR_SHA
 
-        if [ "${{ env.WORKFLOW_ACTION }}" == "true" ]; then
-          ./delete-deployment-script.sh $PR_SHA
-        fi
     
