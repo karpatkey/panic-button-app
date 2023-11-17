@@ -1,18 +1,22 @@
 name: PR Comment
 
 on:
+  workflow_run:
+    workflows: ["PR Deployment CI/CD"]
+    types:
+      - completed
   pull_request:
     branches:
       - develop
     types:
       - opened
-      # - reopened
+
     
 jobs:
 
   comment:
     runs-on: self-hosted
-    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    # if: github.event_name == 'pull_request' && github.event.action == 'opened'
     steps:
     - uses: actions/checkout@v4
       
