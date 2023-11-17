@@ -44,5 +44,6 @@ jobs:
         ./delete-deployment-script.sh $PR_SHA
 
     - name: Print PR Number
-      run: echo "Closed PR Number: ${{ env.PR_NUMBER }}"
+      run: |
+        echo "Closed PR Number: ${{ env.PR_NUMBER }}"
     
