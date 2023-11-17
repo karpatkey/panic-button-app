@@ -1,10 +1,10 @@
 name: Comment
 
 on:
-  workflow_run:
-    workflows: ["PR Deployment CI/CD"]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: ["PR Deployment CI/CD"]
+  #   types:
+  #     - completed
   pull_request:
     branches:
       - develop
