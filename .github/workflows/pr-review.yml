@@ -1,0 +1,32 @@
+name: PR CI/CD
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Kubernetes
+      uses: azure/setup-k8s@v1
+      with:
+        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+    - name: Build and Deploy
+      run: |
+        DOCKER_TAG=$(echo ${{ github.sha }} | cut -c1-7)
+        ./deploy-script.sh ${{ github.sha }}
+
+    - name: Clean up
+      run: |
+        rm deployment-temp.yaml
+        rm ingress-temp.yaml
