@@ -17,9 +17,9 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up Kubernetes
-      uses: azure/setup-k8s@v1
+      uses: tale/kubectl-action@v1
       with:
-        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+        base64-kube-config: ${{ secrets.KUBE_CONFIG }}
 
     - name: Build and Deploy
       run: |
