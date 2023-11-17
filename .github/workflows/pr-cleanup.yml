@@ -41,7 +41,7 @@ jobs:
 
     - name: Run Deployment or Deletion Script
       run: |
-        ./delete-deployment-script.sh $PR_SHA
+        ./delete-deployment-script.sh $PR_NUMBER
 
     - name: Print PR Number
       run: |
