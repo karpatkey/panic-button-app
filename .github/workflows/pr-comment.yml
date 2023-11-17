@@ -12,7 +12,7 @@ jobs:
 
   comment:
     runs-on: self-hosted
-
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
     steps:
     - uses: actions/checkout@v4
       
