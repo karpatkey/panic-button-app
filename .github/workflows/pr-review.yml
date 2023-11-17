@@ -7,7 +7,6 @@ on:
     types:
       - opened
       - synchronize
-      - closed
 
 jobs:
 
@@ -57,26 +56,12 @@ jobs:
       with:
         base64-kube-config: ${{ secrets.KUBE_CONFIG }}
 
-    - name: Determine Workflow Action
-      id: determine_action
-      run: echo "WORKFLOW_ACTION=${{ (github.event.pull_request.merged == true || github.event_name == 'closed') && github.repository == 'karpatkey/panic-button-app' && github.event.pull_request.base.ref == 'develop' && github.event.pull_request.head.sha }}" >> $GITHUB_ENV
-
-    - name: Run Deployment or Deletion Script
+    - name: Build and Deploy
       run: |
         PR_SHA=$(echo ${{ github.event.after }})
 
-        if [ "${{ env.WORKFLOW_ACTION }}" == "true" ]; then
-          ./delete-deployment-script.sh $PR_SHA
-        else
-          ./deploy-script.sh $PR_SHA
-        fi
-    
-    # - name: Build and Deploy
-    #   run: |
-    #     PR_SHA=$(echo ${{ github.event.after }})
-
-    #     # Use PR_SHA in your deploy script
-    #     ./deploy-script.sh $PR_SHA
+        # Use PR_SHA in your deploy script
+        ./deploy-script.sh $PR_SHA
 
     - name: Clean up
       run: |

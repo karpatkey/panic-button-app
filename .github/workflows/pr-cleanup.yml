@@ -1,0 +1,34 @@
+name: PR CI/CD
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types:
+      - closed
+      - synchronize
+
+jobs:
+  delete-pr-deployment:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Kubernetes
+      uses: tale/kubectl-action@v1
+      with:
+        base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+
+    - name: Determine Workflow Action
+      id: determine_action
+      run: echo "WORKFLOW_ACTION=${{ (github.event.pull_request.merged == true || github.event_name == 'closed') && github.repository == 'karpatkey/panic-button-app' && github.event.pull_request.base.ref == 'develop' && github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+
+    - name: Run Deployment or Deletion Script
+      run: |
+        PR_SHA=$(echo ${{ github.event.after }})
+
+        if [ "${{ env.WORKFLOW_ACTION }}" == "true" ]; then
+          ./delete-deployment-script.sh $PR_SHA
+        
+    
