@@ -23,7 +23,7 @@ jobs:
 
     - name: Run Deployment or Deletion Script
       run: |
-        PR_SHA=$(echo ${{ github.event.after }})
+        PR_SHA=$(echo ${{ github.event.before }})
         ./delete-deployment-script.sh $PR_SHA
 
     
