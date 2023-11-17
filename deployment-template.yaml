@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: develop-panic-button-app-{{PR_NUMBER}}
-        image: registry.digitalocean.com/karpatkey/panic-button-app:develop{{DOCKER_TAG}}
+        image: registry.digitalocean.com/karpatkey/panic-button-app:pr{{DOCKER_TAG}}
         imagePullPolicy: Always
         command:
           ['/bin/sh', '-c']
