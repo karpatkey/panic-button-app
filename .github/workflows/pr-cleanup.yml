@@ -11,9 +11,11 @@ jobs:
   delete-pr-deployment:
     runs-on: self-hosted
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
+    - name: Set PR_SHA as Environment Variable
+      run: echo "PR_SHA=$(echo ${{ github.event.after }} | cut -c1-7)" >> $GITHUB_ENV
+  
     - name: Set up Kubernetes
       uses: tale/kubectl-action@v1
       with:
