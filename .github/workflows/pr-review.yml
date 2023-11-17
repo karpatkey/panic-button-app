@@ -23,8 +23,10 @@ jobs:
 
     - name: Build and Deploy
       run: |
-        DOCKER_TAG=$(echo ${{ github.sha }} | cut -c1-7)
-        ./deploy-script.sh ${{ github.sha }}
+        PR_SHA=$(echo ${{ github.event.before }})
+
+        # Use PR_SHA in your deploy script
+        ./deploy-script.sh $PR_SHA
 
     - name: Clean up
       run: |
