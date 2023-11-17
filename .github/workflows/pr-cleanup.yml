@@ -6,7 +6,7 @@ on:
       - develop
     types:
       - closed
-      - synchronize
+      
 
 jobs:
   delete-pr-deployment:
@@ -14,29 +14,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set PR_SHA as Environment Variable
-      run: echo "PR_SHA=$(echo ${{ github.event.before }} | cut -c1-7)" >> $GITHUB_ENV
-  
     - name: Set up Kubernetes
       uses: tale/kubectl-action@v1
       with:
         base64-kube-config: ${{ secrets.KUBE_CONFIG }}
 
-    # - name: Run Deployment or Deletion Script
-    #   run: |
-    #     PR_SHA=$(echo ${{ github.event.before }})
-    #     ./delete-deployment-script.sh $PR_SHA
-
     - name: Determine Workflow Action
       id: determine_action
       run: |
         PR_NUMBER=${{ github.event.pull_request.number }}
-        if [ "${{ github.event.pull_request.merged }}" == "true" ]; then
-          PR_SHA=${{ github.event.before }}
-        else
-          PR_SHA=${{ github.event.after }}
-        fi
-        echo "WORKFLOW_ACTION=${{ (github.event.pull_request.merged == true || github.event_name == 'closed') && github.repository == 'karpatkey/panic-button-app' && github.event.pull_request.base.ref == 'develop' && github.event.pull_request.head.sha }}" >> $GITHUB_ENV
         echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
 
     - name: Run Deployment or Deletion Script
