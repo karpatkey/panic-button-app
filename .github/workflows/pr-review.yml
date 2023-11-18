@@ -18,7 +18,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set PR_SHA as Environment Variable
-        run: echo "PR_SHA=$(echo ${{ github.event.after }} | cut -c1-7)" >> $GITHUB_ENV
+        run: |
+          PR_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "PR_SHA=${PR_SHA}" >> $GITHUB_ENV
 
       - name: Docker meta
         id: docker_meta
@@ -59,7 +61,7 @@ jobs:
 
     - name: Build and Deploy
       run: |
-        PR_SHA=$(echo ${{ github.event.after }})
+        PR_SHA=${{ env.PR_SHA }}
 
         # Use PR_SHA in your deploy script
         ./deploy-script.sh $PR_SHA
