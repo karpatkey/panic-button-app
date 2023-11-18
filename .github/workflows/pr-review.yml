@@ -61,7 +61,7 @@ jobs:
 
     - name: Build and Deploy
       run: |
-        PR_SHA=${{ env.PR_SHA }}
+        PR_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
 
         # Use PR_SHA in your deploy script
         ./deploy-script.sh $PR_SHA
