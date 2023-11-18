@@ -13,7 +13,7 @@
     "lint:eslint:fix": "eslint --fix 'src/**/*.{ts,tsx}'",
     "lint:tsc": "tsc -p tsconfig.json",
     "prepare": "husky install",
-    "commit": "git-cz",
+    "commit": "git-cz-11",
     "bulk:positions": "NODE_PATH=./src ts-node --project ./tsconfig.json ./src/scripts/dump/positions.ts"
   },
   "dependencies": {
