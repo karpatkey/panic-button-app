@@ -19,7 +19,7 @@ jobs:
 
       - name: Set PR_SHA as Environment Variable
         run: |
-          PR_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          PR_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
           echo "PR_SHA=${PR_SHA}" >> $GITHUB_ENV
 
       - name: Docker meta
