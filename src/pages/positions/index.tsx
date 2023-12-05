@@ -9,6 +9,7 @@ import { getSession, Session } from '@auth0/nextjs-auth0'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { updateStatus, addPositions, addDAOs, clearSearch, filter } from 'src/contexts/reducers'
 import { Position, Status } from 'src/contexts/state'
+import * as Minio from 'minio';
 
 interface PositionsPageProps {
   positions: Position[]
@@ -59,6 +60,53 @@ export const getServerSideProps = async (context: {
     }
   }
 
+
+  const endpoint = ''
+  const accessKey = ''
+  const secretKey = ''
+  const useSSL = false; // Change to true if your MinIO server uses SSL
+
+// Initialize MinIO client object
+  const minioClient = new Minio.Client({
+    endPoint: endpoint,
+    port: 80,
+    accessKey: accessKey,
+    secretKey: secretKey,
+    useSSL: useSSL,
+  });
+
+// Specify the bucket name and JSON file path
+  const bucketName = 'panic-button-app-jsons';
+  const jsonFilePath = 'GnosisDAO-ethereum.json';
+
+
+  try {
+    console.log('AAAAA1')
+    const buckets = await minioClient.listBuckets()
+    console.log('BBBBB1')
+    console.log('Success', buckets)
+  } catch (err) {
+    console.log('CCCCC1', err)
+    console.log(err.message)
+  }
+//   let size = 0
+// // Get a full object.
+//   minioClient.getObject(bucketName, jsonFilePath, function (e, dataStream) {
+//     if (e) {
+//       return console.log(e)
+//     }
+//     dataStream.on('data', function (chunk) {
+//       size += chunk.length
+//     })
+//     dataStream.on('end', function () {
+//       console.log('End. Total size = ' + size)
+//     })
+//     dataStream.on('error', function (e) {
+//       console.log(e)
+//     })
+//   })
+//
+//
   const user = (session as Session).user
   const roles = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
