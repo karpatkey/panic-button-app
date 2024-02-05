@@ -58,6 +58,12 @@ export const Tenderly = () => {
     [blockchain, transaction, decodedTransaction, transactionBuildStatus]
   )
 
+  React.useEffect(() => {
+    if (!isDisabled && simulationStatus === 'not done' && !isLoading) {
+      onSimulate().then(() => console.log('Simulation finished'))
+    }
+  }, [isDisabled, simulationStatus, isLoading])
+
   const onSimulate = React.useCallback(async () => {
     try {
       dispatch(setSetupSimulation(null))
@@ -117,7 +123,14 @@ export const Tenderly = () => {
     if (!isDisabled && simulationStatus === 'not done') {
       onSimulate().then(() => console.log('Simulation finished'))
     }
-  }, [isDisabled, onSimulate, simulationStatus])
+  }, [blockchain, transaction, dispatch, isDisabled, selectedDAO])
+
+  const color =
+    simulationStatus === ('success' as SetupItemStatus)
+      ? 'green'
+      : simulationStatus === ('failed' as SetupItemStatus)
+        ? 'red'
+        : 'black'
 
   const showSimulateButton = !isLoading && !shareUrl && !isDisabled
   return (

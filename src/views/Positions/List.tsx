@@ -1,14 +1,20 @@
 import { Box } from '@mui/material'
 import * as React from 'react'
 import Card from 'src/views/Positions/Card'
-import { Position } from 'src/contexts/state'
+import { Position, Status } from 'src/contexts/state'
+import { useApp } from 'src/contexts/app.context'
+import EmptyData from 'src/components/EmptyData'
 
-interface ListProps {
-  positions: Position[]
-}
+const List = () => {
+  const { state } = useApp()
+  const { filteredPositions, search, status } = state
 
-const List = (props: ListProps) => {
-  const { positions } = props
+  if (
+    (filteredPositions?.length === 0 && !search) ||
+    (filteredPositions?.length === 0 && status === Status.Finished)
+  ) {
+    return <EmptyData />
+  }
 
   return (
     <Box
@@ -19,7 +25,7 @@ const List = (props: ListProps) => {
         gap: '20px 20px'
       }}
     >
-      {positions.map((position: Position, index: number) => {
+      {filteredPositions.map((position: Position, index: number) => {
         return (
           <Box
             key={index}
