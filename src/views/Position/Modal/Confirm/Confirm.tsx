@@ -40,7 +40,6 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
   const confirmStatus = state?.setup?.confirm?.status ?? null
   const txHash = state?.setup?.confirm?.value?.txHash ?? null
   const selectedDAO = state?.selectedPosition?.dao ?? null
-
   const isLoading = confirmStatus == 'loading'
 
   // Get env network data
@@ -144,6 +143,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       dispatch(setSetupConfirmStatus('failed' as SetupItemStatus))
     }
   }, [isDisabled, dispatch, transaction, blockchain, selectedDAO, ENV_NETWORK_DATA])
+
 
   return (
     <AccordionBoxWrapper

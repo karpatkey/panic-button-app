@@ -87,8 +87,6 @@ export default withApiAuthRequired(async function handler(
     execution_type as EXECUTION_TYPE
   )
 
-  console.log('FilePath', filePath)
-
   if (execution_type === 'transaction_builder') {
     try {
       // Build de arguments for the transaction builder

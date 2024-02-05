@@ -3,6 +3,14 @@ export enum Status {
   Finished = 'Finished'
 }
 
+export type Token = {
+  symbol: string
+  supply: number
+  borrow: number
+  price: number
+  updatedAt: number
+}
+
 export type Position = {
   position_id: string
   dao: string
@@ -10,7 +18,22 @@ export type Position = {
   blockchain: string
   lptoken_address: string
   lptoken_name: string
-  isActive: boolean | undefined
+  isActive?: boolean
+  tokens?: Token[]
+}
+
+export type DBankInfo = {
+  chain: string
+  wallet: string
+  protocol_name: string
+  position: string
+  pool_id: string
+  position_type: string
+  token_type: string
+  symbol: string
+  amount: number
+  price: number
+  datetime: number
 }
 
 export type Strategy = {
@@ -41,6 +64,11 @@ export enum SetupItemStatus {
   Success = 'success'
 }
 
+export enum State {
+  Active = 'Active',
+  Inactive = 'Inactive'
+}
+
 export enum SetupStatus {
   Loading = 'loading',
   Create = 'create',
@@ -56,9 +84,11 @@ export const initialState: InitialState = {
   positions: [],
   filteredPositions: [],
   selectedPosition: null,
+  selectedState: State.Active,
   search: null,
   DAOs: [],
   selectedDAO: null,
+  isFetchingTokens: false,
   envNetworkData: null,
   setup: {
     status: SetupStatus.Loading,
@@ -93,6 +123,8 @@ export type InitialState = {
   search: Maybe<string>
   DAOs: string[]
   selectedDAO: Maybe<string>
+  selectedState: Maybe<State>
+  isFetchingTokens: boolean
   envNetworkData: Maybe<any>
   setup: {
     status: SetupStatus

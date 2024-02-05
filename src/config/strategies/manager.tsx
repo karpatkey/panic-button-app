@@ -80,6 +80,15 @@ export const DAO_MAPPER: DAO_MAPPER_TYPE[] = [
     simulateFilePath: 'roles_royce/roles_royce/applications/panic_button_app/simulate.py',
     transactionBuilderFilePath:
       'roles_royce/roles_royce/applications/panic_button_app/transaction_builder.py'
+  },
+  {
+    name: 'karpatkey DAO',
+    blockchain: 'Ethereum',
+    config: karpatkeyDAO_ethereum,
+    executeFilePath: 'roles_royce/roles_royce/applications/panic_button_app/execute.py',
+    simulateFilePath: 'roles_royce/roles_royce/applications/panic_button_app/simulate.py',
+    transactionBuilderFilePath:
+      'roles_royce/roles_royce/applications/panic_button_app/transaction_builder.py'
   }
 ]
 

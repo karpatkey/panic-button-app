@@ -1,4 +1,12 @@
-import { Position, SetupItemStatus, SetupStatus, Status, Strategy, TransactionBuild } from './state'
+import {
+  DBankInfo,
+  Position,
+  SetupItemStatus,
+  SetupStatus,
+  Status,
+  Strategy,
+  TransactionBuild
+} from './state'
 
 export enum ActionType {
   UpdateStatus,
@@ -26,7 +34,9 @@ export enum ActionType {
   ClearSetup,
   ClearSetupWithoutCreate,
   UpdateEnvNetworkData,
-  Filter
+  Filter,
+  UpdatePositionsWithTokenBalances,
+  UpdateIsFetchingTokens
 }
 
 export interface UpdateStatus {
@@ -150,6 +160,16 @@ export interface Filter {
   type: ActionType.Filter
 }
 
+export interface UpdatePositionsWithTokenBalances {
+  type: ActionType.UpdatePositionsWithTokenBalances
+  payload: DBankInfo[]
+}
+
+export interface UpdateIsFetchingTokens {
+  type: ActionType.UpdateIsFetchingTokens
+  payload: boolean
+}
+
 export type Actions =
   | UpdateStatus
   | AddPositions
@@ -177,3 +197,5 @@ export type Actions =
   | ClearSetupWithoutCreate
   | UpdateEnvNetworkData
   | Filter
+  | UpdatePositionsWithTokenBalances
+  | UpdateIsFetchingTokens
