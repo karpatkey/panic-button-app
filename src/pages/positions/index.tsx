@@ -13,7 +13,9 @@ import {
   addDAOs,
   clearSearch,
   filter,
-  addDaosConfigs
+  addDaosConfigs,
+  updatePositionsWithTokenBalances,
+  updateIsFetchingTokens
 } from 'src/contexts/reducers'
 import { Position, Status } from 'src/contexts/state'
 import { getDaosConfigs } from 'src/utils/jsonsFetcher'
@@ -27,7 +29,8 @@ interface PositionsPageProps {
 const PositionsPage = (props: PositionsPageProps) => {
   const { positions = [], DAOs, daosConfigs = [] } = props
 
-  const { dispatch } = useApp()
+  const { dispatch, state } = useApp()
+  const { status, isFetchingTokens } = state
 
   React.useEffect(() => {
     const start = () => {
@@ -46,6 +49,27 @@ const PositionsPage = (props: PositionsPageProps) => {
 
     start()
   }, [dispatch, DAOs, positions, daosConfigs])
+
+  React.useEffect(() => {
+    const start = async () => {
+      try {
+        if (status !== 'Finished') return
+
+        console.log('fetching tokens', isFetchingTokens, status)
+
+        dispatch(updateIsFetchingTokens(true))
+        const response = await fetch('/api/dbank')
+        const { data = [] } = await response.json()
+        dispatch(updatePositionsWithTokenBalances(data))
+        dispatch(filter())
+        dispatch(updateIsFetchingTokens(false))
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    start()
+  }, [dispatch, status])
 
   return <WrapperPositions />
 }

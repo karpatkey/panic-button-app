@@ -1,8 +1,10 @@
 import {
+  DBankInfo,
   InitialState,
   Position,
   SetupItemStatus,
   SetupStatus,
+  State,
   Status,
   Strategy,
   TransactionBuild
@@ -36,8 +38,12 @@ import {
   UpdateEnvNetworkData,
   Filter,
   UpdateStatus,
-  AddDaosConfigs
+  AddDaosConfigs,
+  UpdatePositionsWithTokenBalances,
+  UpdateIsFetchingTokens
 } from './actions'
+import { BLOCKCHAIN, DAO, EXECUTION_TYPE, getDAOFilePath } from '../config/strategies/manager'
+import { getStrategy } from '../utils/strategies'
 
 export const mainReducer = (state: InitialState, action: Actions): InitialState => {
   switch (action.type) {
@@ -51,26 +57,31 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
         ...state,
         status: action.payload
       }
+
     case ActionType.AddPositions:
       return {
         ...state,
         positions: action.payload
       }
+
     case ActionType.ClearPositions:
       return {
         ...state,
         positions: []
       }
+
     case ActionType.SetSelectedPosition:
       return {
         ...state,
         selectedPosition: action.payload
       }
+
     case ActionType.ClearSelectedPosition:
       return {
         ...state,
         selectedPosition: null
       }
+
     case ActionType.AddDAOs:
       if (!action.payload.includes('All') && action.payload.length > 1) {
         return {
@@ -124,6 +135,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.SetSetupCreateStatus:
       return {
         ...state,
@@ -135,6 +147,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.SetSetupTransactionBuild:
       return {
         ...state,
@@ -146,6 +159,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.SetSetupTransactionBuildStatus:
       return {
         ...state,
@@ -157,6 +171,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.SetSetupTransactionCheck:
       return {
         ...state,
@@ -168,6 +183,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.SetSetupTransactionCheckStatus:
       return {
         ...state,
@@ -179,6 +195,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.SetSetupSimulation:
       return {
         ...state,
@@ -190,6 +207,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.SetSetupSimulationStatus:
       return {
         ...state,
@@ -201,6 +219,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.SetSetupConfirm:
       return {
         ...state,
@@ -212,6 +231,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.SetSetupConfirmStatus:
       return {
         ...state,
@@ -223,6 +243,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.SetSetupStatus:
       return {
         ...state,
@@ -231,6 +252,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           status: action.payload
         }
       }
+
     case ActionType.ClearSetup:
       return {
         ...state,
@@ -258,6 +280,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.ClearSetupWithoutCreate:
       return {
         ...state,
@@ -281,34 +304,127 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
           }
         }
       }
+
     case ActionType.Filter:
       // Filter positions by DAO
-      const filteredPositionsByDAO = state.positions.filter((position: Position) => {
-        if (state.selectedDAO === 'All') return true
-        return position?.dao?.toLowerCase() === state?.selectedDAO?.toLowerCase()
-      })
+      const filteredPositionsByDAO =
+        state?.positions?.filter((position: Position) => {
+          if (state.selectedDAO === 'All') return true
+          return position?.dao?.toLowerCase() === state?.selectedDAO?.toLowerCase()
+        }) ?? []
 
       // Filter positions by search
-      const filteredPositionsByDAOAndSearch = filteredPositionsByDAO.filter(
-        (position: Position) => {
+      const filteredPositionsByDAOAndSearch =
+        filteredPositionsByDAO?.filter((position: Position) => {
           if (state?.search === null) return true
           return (
             position?.lptoken_name?.toLowerCase()?.includes(state?.search?.toLowerCase()) ||
             position?.protocol?.toLowerCase()?.includes(state?.search?.toLowerCase()) ||
             position?.lptoken_address?.toLowerCase()?.includes(state?.search?.toLowerCase())
           )
-        }
-      )
+        }) ?? []
+
+      // Order by state
+      const filteredPositionsByDAOAndSearchAndOrdered =
+        filteredPositionsByDAOAndSearch
+          ?.map((position: Position) => {
+            const { positionConfig } = getStrategy(state.daosConfigs, position as Position)
+            const isActive = !!positionConfig.find((p) => p.stresstest)
+            return {
+              ...position,
+              isActive
+            }
+          })
+          .sort((a: Position, b: Position) => {
+            // check state.selectedState 'Active' to order
+            if (state.selectedState === State.Active) {
+              if (a.isActive && !b.isActive) return -1
+              if (!a.isActive && b.isActive) return 1
+            }
+            // check state.selectedState 'Inactive' to order
+            if (state.selectedState === State.Inactive) {
+              if (!a.isActive && b.isActive) return -1
+              if (a.isActive && !b.isActive) return 1
+            }
+            // sort by lptoken_name
+            if (a.lptoken_name < b.lptoken_name) return -1
+            if (a.lptoken_name > b.lptoken_name) return 1
+
+            // if state.selectedState is null, don't order
+            return 0
+          }) ?? []
 
       return {
         ...state,
-        filteredPositions: filteredPositionsByDAOAndSearch
+        filteredPositions: filteredPositionsByDAOAndSearchAndOrdered
       }
+
     case ActionType.UpdateEnvNetworkData:
       return {
         ...state,
         envNetworkData: action.payload
       }
+
+    case ActionType.UpdatePositionsWithTokenBalances:
+      const dBankData = action.payload
+      const positionsWithTokens = state?.positions?.map((position: Position) => {
+        const dBankTokens: DBankInfo[] =
+          dBankData?.filter((dbankInfo: DBankInfo) => {
+            // should match by dBandk properties chain, protocol_name, position
+            return (
+              dbankInfo?.chain?.toLowerCase() === position.blockchain.toLowerCase() &&
+              dbankInfo?.protocol_name?.toLowerCase() === position.protocol.toLowerCase() &&
+              dbankInfo?.position?.toLowerCase() === position.lptoken_name.toLowerCase() &&
+              (dbankInfo?.token_type === 'supply' || dbankInfo?.token_type === 'borrow')
+            )
+          }) ?? []
+
+        const tokens =
+          dBankTokens
+            ?.map((token: DBankInfo) => {
+              const updateAt = new Date().getTime()
+              return {
+                symbol: token.symbol,
+                supply: token.token_type === 'supply' ? token.amount : 0,
+                borrow: token.token_type === 'borrow' ? token.amount : 0,
+                price: token.price,
+                updatedAt: updateAt
+              }
+            })
+            ?.reduce((acc: any, token: any) => {
+              // reduce tokens by supply or borrow with the biggest amount,
+              // the problem is the json file in the dBank script have multiple entries for the same token
+              const tokenIndex = acc.findIndex((accToken: any) => accToken.symbol === token.symbol)
+              if (tokenIndex === -1) {
+                acc.push(token)
+              } else {
+                if (acc[tokenIndex].supply < token.supply) {
+                  acc[tokenIndex].supply = token.supply
+                }
+                if (acc[tokenIndex].borrow < token.borrow) {
+                  acc[tokenIndex].borrow = token.borrow
+                }
+              }
+              return acc
+            }, []) ?? []
+
+        return {
+          ...position,
+          tokens
+        }
+      })
+
+      return {
+        ...state,
+        positions: positionsWithTokens
+      }
+
+    case ActionType.UpdateIsFetchingTokens:
+      return {
+        ...state,
+        isFetchingTokens: action.payload
+      }
+
     default:
       return state
   }
@@ -446,4 +562,16 @@ export const updateEnvNetworkData = (data: any): UpdateEnvNetworkData => ({
 
 export const filter = (): Filter => ({
   type: ActionType.Filter
+})
+
+export const updatePositionsWithTokenBalances = (
+  data: DBankInfo[]
+): UpdatePositionsWithTokenBalances => ({
+  type: ActionType.UpdatePositionsWithTokenBalances,
+  payload: data
+})
+
+export const updateIsFetchingTokens = (isFetching: boolean): UpdateIsFetchingTokens => ({
+  type: ActionType.UpdateIsFetchingTokens,
+  payload: isFetching
 })

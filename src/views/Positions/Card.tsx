@@ -1,11 +1,12 @@
 import PositionName from 'src/views/Positions/PositionName'
 import ProtocolIcon from 'src/views/Positions/ProtocolIcon'
-import Title from 'src/views/Positions/Title'
+import { Title } from 'src/views/Positions/Title'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import * as React from 'react'
 import Link from 'next/link'
 import { Position } from 'src/contexts/state'
+import { Balances } from './Balances'
 
 interface PositionProps {
   id: number
@@ -20,7 +21,8 @@ const Card = (props: PositionProps) => {
     blockchain,
     lptoken_name: positionName,
     dao,
-    isActive
+    isActive,
+    tokens
   } = position
 
   const CardWrapper = () => {
@@ -49,6 +51,7 @@ const Card = (props: PositionProps) => {
         <BoxWrapperColumn gap={1}>
           <PositionName position={positionName} />
         </BoxWrapperColumn>
+        <Balances tokens={tokens} />
       </BoxWrapperColumn>
     )
   }
