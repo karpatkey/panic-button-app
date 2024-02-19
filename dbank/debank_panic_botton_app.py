@@ -4,8 +4,16 @@ import os
 import time
 from datetime import datetime
 
+from dotenv import load_dotenv
 import pandas as pd
 import requests
+
+
+load_dotenv()
+
+
+def access_key():
+    return os.getenv('DEBANK_API_KEY')
 
 
 def debank_dataframe_from_pos_detail(chain, wallet, name, objeto):
@@ -89,8 +97,6 @@ def debank_dataframe_from_pos_detail(chain, wallet, name, objeto):
 
 
 def debank_protocol_api_call(wallet):
-    access_key = "PUT_THE_ACCESS_KEY_HERE"
-
     # chain = 'eth'
     # URL de la API
     complex_protocol_list = f"https://pro-openapi.debank.com/v1/user/all_complex_protocol_list?id={wallet}"
@@ -120,8 +126,10 @@ def debank_protocol_to_df(input_data):
 
     for element in data:
         for position in element["portfolio_item_list"]:
-            df = debank_dataframe_from_pos_detail(element["chain"], wallet, element["name"], position)
-            debank_positions = pd.concat([debank_positions, df], ignore_index=True)
+            df = debank_dataframe_from_pos_detail(
+                element["chain"], wallet, element["name"], position)
+            debank_positions = pd.concat(
+                [debank_positions, df], ignore_index=True)
 
     # debank_positions.to_clipboard()
 
@@ -131,10 +139,8 @@ def debank_protocol_to_df(input_data):
 def debank_wallet_api_call(wallet):
     wallet_list = f"https://pro-openapi.debank.com/v1/user/all_token_list?id={wallet}"
 
-    access_key = "18fce6822d8788b01f181472652ebc63012a3dd4"
-
     # Headers para la solicitud
-    headers = {"accept": "application/json", "AccessKey": access_key}
+    headers = {"accept": "application/json", "AccessKey": access_key()}
 
     # Realiza la solicitud GET
     response = requests.get(wallet_list, headers=headers)
@@ -173,8 +179,7 @@ def main_debank_etl(wallet=None):
         wallets = [wallet]
     else:
         wallets = [
-            "0x0efccbb9e2c09ea29551879bd9da32362b32fc89"
-              ,
+            "0x0efccbb9e2c09ea29551879bd9da32362b32fc89",
             "0x616de58c011f8736fa20c7ae5352f7f6fb9f0669",
             "0x4F2083f5fBede34C2714aFfb3105539775f7FE64",
             "0x458cd345b4c05e8df39d0a07220feb4ec19f5e6f",
@@ -241,8 +246,6 @@ def main_debank_etl(wallet=None):
     return total_df
 
 
-
-
 def transform_position(row):
 
     try:
@@ -289,9 +292,7 @@ def transform_chain(chain):
     return chain_mapping.get(chain, chain)
 
 
-
 def get_debank_positions(wallet=None):
-
     """
     Retrieves and transforms DeBank positions data for a given wallet.
 
@@ -313,94 +314,81 @@ def get_debank_positions(wallet=None):
     >>>
     """
 
-
     df = main_debank_etl(wallet=wallet)
     # Filter protocols:
     # print(df)
-    protocols = ['Aura Finance','LIDO','Balancer V2']
+    protocols = ['Aura Finance', 'LIDO', 'Balancer V2']
     filtered_df = df[df['protocol_name'].isin(protocols)]
     df_debank_data = filtered_df.copy()
 
-    #Rename protocols
+    # Rename protocols
 
-    protocol_mapping = {'Aura Finance': 'Aura','Balancer V2': 'Balancer','LIDO': 'Lido'}
-    df_debank_data.loc[:, 'protocol_name'] = df_debank_data['protocol_name'].replace(protocol_mapping)
+    protocol_mapping = {'Aura Finance': 'Aura',
+                        'Balancer V2': 'Balancer', 'LIDO': 'Lido'}
+    df_debank_data.loc[:, 'protocol_name'] = df_debank_data['protocol_name'].replace(
+        protocol_mapping)
 
-    #Work on positiolns
+    # Work on positiolns
 
-    df_debank_data['position'] = df_debank_data.apply(transform_position, axis=1)
+    df_debank_data['position'] = df_debank_data.apply(
+        transform_position, axis=1)
 
-    #Work on pool_id
+    # Work on pool_id
 
     df_debank_data['pool_id'] = df_debank_data.apply(transform_pool_id, axis=1)
 
-
-
-    #Work on chain renaming:
+    # Work on chain renaming:
 
     df_debank_data['chain'] = df_debank_data['chain'].apply(transform_chain)
-
 
     # print(df_debank_data)
 
     # A) Get data using debank data (Aura renaming) data:
     debank_file = os.path.join(os.path.dirname(__file__), "debank_data.json")
 
-
     with open(debank_file, "r") as f:
 
-            debank_data = json.load(f)
+        debank_data = json.load(f)
     df_debank_ref = pd.DataFrame(debank_data)
 
-
-
     first_merge_df = pd.merge(df_debank_data, df_debank_ref,
-                    left_on=['protocol_name', 'position', 'chain'],
-                    right_on=['protocol', 'debank_position_name', 'blockchain'],
-                    how='left')
-    #Coalesce after merge:
+                              left_on=['protocol_name', 'position', 'chain'],
+                              right_on=['protocol',
+                                        'debank_position_name', 'blockchain'],
+                              how='left')
+    # Coalesce after merge:
 
-    first_merge_df['position'] = first_merge_df['position_name'].fillna(first_merge_df['position'])
-    first_merge_df = first_merge_df.drop(columns=['protocol',	'position_name',	'blockchain'	,'debank_position_name'	])
+    first_merge_df['position'] = first_merge_df['position_name'].fillna(
+        first_merge_df['position'])
+    first_merge_df = first_merge_df.drop(
+        columns=['protocol',	'position_name',	'blockchain', 'debank_position_name'])
 
-
-
-
-    #B ) Get data using pool id Kitchen data:
+    # B ) Get data using pool id Kitchen data:
     kitchen_file = os.path.join(os.path.dirname(__file__), "kitchen.json")
-
 
     with open(kitchen_file, "r") as f:
 
-            kitchen_data = json.load(f)
+        kitchen_data = json.load(f)
     df_kitchen = pd.DataFrame(kitchen_data)
-
-
-
 
     # 1. Realizar la operación JOIN
     second_merged_df = pd.merge(first_merge_df, df_kitchen,
-                        left_on=['chain', 'pool_id', 'protocol_name', 'wallet'],
-                        right_on=['blockchain', 'lptoken_address', 'protocol', 'wallet'],
-                        how='left')
+                                left_on=['chain', 'pool_id',
+                                         'protocol_name', 'wallet'],
+                                right_on=[
+                                    'blockchain', 'lptoken_address', 'protocol', 'wallet'],
+                                how='left')
 
-    #Coalesce after merge:
+    # Coalesce after merge:
 
-    second_merged_df['position'] = second_merged_df['lptoken_name'].fillna(second_merged_df['position'])
-    second_merged_df = second_merged_df.drop(columns=['lptoken_name','protocol','lptoken_address','blockchain','contains_wsteth',	'nonfarming_position','position_id','dao'])
-
-
-    # print(second_merged_df)
-    # second_merged_df.to_clipboard()
-
-
+    second_merged_df['position'] = second_merged_df['lptoken_name'].fillna(
+        second_merged_df['position'])
+    second_merged_df = second_merged_df.drop(
+        columns=['lptoken_name', 'protocol', 'lptoken_address', 'blockchain', 'contains_wsteth',	'nonfarming_position', 'position_id', 'dao'])
 
     second_merged_df.to_clipboard()
     json_data = second_merged_df.to_json(orient='records')
     return json_data
-
-
-
 
 
 if __name__ == "__main__":
