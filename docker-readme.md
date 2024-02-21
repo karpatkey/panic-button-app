@@ -21,13 +21,13 @@
 
 - create `key.yaml` file
 
-- copy `modified-execute.py` to `roles_royce/roles_royce/applications/panic_button_app/execute.py` 
-
 ```
 type: "file-raw"
 keyType: "SECP256K1"
 privateKey: "Pk here"
 ```
+
+- copy `modified-execute.py` to `roles_royce/roles_royce/applications/panic_button_app/execute.py` 
 
 - Un-comment the below portion in docker-compose.yml
 
