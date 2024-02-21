@@ -5,6 +5,8 @@ services:
       context: .
       target: dev
     container_name: dev
+    environment:
+      - WEB3SIGNER_URL=http://signer:9000
     env_file:
       - .env # Specify the path to your .env file
     ports:
@@ -19,6 +21,8 @@ services:
     build:
       context: .
     container_name: prod
+    environment:
+      - WEB3SIGNER_URL=http://signer:9000
     env_file:
       - .env # Specify the path to your .env file
     ports:
@@ -39,3 +43,18 @@ services:
     entrypoint: /bin/sh -c "anvil --accounts 15 -f $GNOSIS_RPC_ENDPOINT --port 8547 --host 0.0.0.0"
     ports:
       - '8547:8547'
+
+  web3signer:
+    image: consensys/web3signer:develop
+    container_name: signer
+    ports:
+      - '9000:9000'
+    volumes:
+      - ./key.yaml:/home/node/signer/keyFiles/key.yaml
+      - ./config.yaml:/home/node/signer/config.yaml
+    command:
+      - '--config-file=/home/node/signer/config.yaml'
+      - '--swagger-ui-enabled=true'
+      - '--logging=DEBUG'
+      - 'eth1'
+      - '--chain-id=100'
