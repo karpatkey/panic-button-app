@@ -42,6 +42,7 @@ COPY --from=builder /app/yarn.lock ./yarn.lock
 COPY --from=builder /app/roles_royce ./roles_royce
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/src ./src
+COPY --from=builder /app/dbank ./dbank
 COPY --from=builder /app/requirements.txt ./requirements.txt
 COPY --from=builder /usr/lib/python3.10/site-packages/ /usr/lib/python3.10/site-packages/
 COPY --from=builder /app/*.js ./
