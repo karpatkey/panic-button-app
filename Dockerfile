@@ -20,7 +20,8 @@ RUN apk --no-cache add \
     musl-dev \
     gcc \
     git \
-    g++ && \
+    g++ \
+    py3-pandas && \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \
     pip3 install --no-cache --upgrade pip setuptools && \
@@ -51,7 +52,8 @@ COPY run.sh /app/run.sh
 RUN chmod +x /app/run.sh
 
 # Install Python 3.10 in the runner stage
-RUN apk --no-cache add python3
+# Install openlabs for numpy+pandas
+RUN apk --no-cache add python3 openblas
 
 # Set environment variables
 ENV PYTHONUNBUFFERED 1
