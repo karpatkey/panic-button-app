@@ -46,9 +46,13 @@ const PositionsPage = (props: PositionsPageProps) => {
         dispatch(updateIsFetchingTokens(true))
         const response = await fetch('/api/dbank')
         const { data = [] } = await response.json()
-        dispatch(updatePositionsWithTokenBalances(data))
-        dispatch(filter())
-        dispatch(updateIsFetchingTokens(false))
+        if (data?.status == false) {
+          // Handle possible error
+        } else {
+          dispatch(updatePositionsWithTokenBalances(data))
+          dispatch(filter())
+          dispatch(updateIsFetchingTokens(false))
+        }
       } catch (e) {
         console.error(e)
       }
