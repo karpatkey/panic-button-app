@@ -381,7 +381,7 @@ def get_debank_positions(wallet=None):
     second_merged_df = second_merged_df.drop(
         columns=['lptoken_name', 'protocol', 'lptoken_address', 'blockchain', 'contains_wsteth',	'nonfarming_position', 'position_id', 'dao'])
 
-    second_merged_df.to_clipboard()
+    # second_merged_df.to_clipboard()
     json_data = second_merged_df.to_json(orient='records')
     return json_data
 
