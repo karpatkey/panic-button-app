@@ -1,11 +1,19 @@
+import React from 'react'
 import CustomTypography from 'src/components/CustomTypography'
-import * as React from 'react'
 
 interface USDProps {
   value: string
 }
 
 export const USD = ({ value }: USDProps) => {
+  const formattedValue = React.useMemo(() => {
+    const USDollar = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    })
+
+    return USDollar.format(+value)
+  }, [value])
   return (
     <CustomTypography
       sx={{
@@ -19,7 +27,7 @@ export const USD = ({ value }: USDProps) => {
         textAlign: 'end'
       }}
     >
-      {value}
+      {formattedValue}
     </CustomTypography>
   )
 }
