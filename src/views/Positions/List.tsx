@@ -32,7 +32,6 @@ const List = () => {
             sx={{
               width: '380px',
               minHeight: '140px',
-              maxHeight: '200px',
               padding: '12px 12px',
               border: '1px solid #B6B6B6',
               background: 'background.paper',
