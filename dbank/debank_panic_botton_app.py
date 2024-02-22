@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 import pandas as pd
 import requests
 import traceback
+import aiohttp
+import asyncio
 
 
 load_dotenv()
@@ -18,6 +20,50 @@ def access_key():
 
 
 ACCESS_KEY = access_key()
+DEFAULT_WALLETS = [
+    "0x0efccbb9e2c09ea29551879bd9da32362b32fc89",
+    "0x616de58c011f8736fa20c7ae5352f7f6fb9f0669",
+    "0x4F2083f5fBede34C2714aFfb3105539775f7FE64",
+    "0x458cd345b4c05e8df39d0a07220feb4ec19f5e6f",
+    "0x4971dd016127f390a3ef6b956ff944d0e2e1e462",
+    "0x849d52316331967b6ff1198e5e32a0eb168d039d",
+    "0x10e4597ff93cbee194f4879f8f1d54a370db6969",
+    "0x58e6c7ab55aa9012eacca16d1ed4c15795669e1c",
+    "0x54e191b01aa9c1f61aa5c3bce8d00956f32d3e71",
+    "0x5ff85ecf773ea3885cb4b691068ab6d7bf8bda9a",
+    "0x048a5ecc705c280b2248aeff88fd581abbeb8587",
+    "0x9298dfD8A0384da62643c2E98f437E820029E75E",
+    "0x51d34416593a8acf4127dc4a40625a8efab9940c",
+    "0x43fd1f07da06b51097a697d4e3c7d369e2e3fd60",
+    "0x3e40d73eb977dc6a537af587d48316fee66e9c8c",
+    "0xca771eda0c70aa7d053ab1b25004559b918fe662",
+    "0xce91228789b57deb45e66ca10ff648385fe7093b",
+    "0xa1cb7762f40318ee0260f53e15de835ff001cb7e",
+    "0xc498e8063c95b65d97fe9172bf952bf1c8d33330",
+    "0xa03be496e67ec29bc62f01a428683d7f9c204930",
+    "0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6",
+    "0xfe89cc7abb2c4183683ab71653c4cdc9b02d44b7",
+    "0x283af0b28c62c092c9727f1ee09c02ca627eb7f5",
+    "0x253553366da8546fc250f225fe3d25d0c782303b",
+    "0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f",
+    "0xee071f4b516f69a1603da393cde8e76c40e5be85",
+    "0xaf23dc5983230e9eeaf93280e312e57539d098d0",
+    "0x570154c8c9f8cb35dc454f1cde33dc8fe30ecd63",
+    "0x1ca861c023b09efa4932d96f1b09de906ebbc4cd",
+    "0x0DA0C3e52C977Ed3cBc641fF02DD271c3ED55aFe",
+    "0x80d63b12aecf8ae5884cbf1d3536bb0c5f612cfc",
+    "0xd3cf852898b21fc233251427c2dc93d3d604f3bb",
+    "0xf51842ebf4dc1e6f89d74ab0768c670ab04d928b",
+    "0x23b4f73fb31e89b27de17f9c5de2660cc1fb0cdf",
+    "0x464c71f6c2f760dda6093dcb91c24c39e5d6e18c",
+    "0x053d55f9b5af8694c503eb288a1b7e552f590710",
+    "0xb2289e329d2f85f1ed31adbb30ea345278f21bcf",
+    "0xe8599f3cc5d38a9ad6f3684cd5cea72f10dbc383",
+    "0x5ba7fd868c40c16f7adfae6cf87121e13fc2f7a0",
+    "0x25f2226b597e8f9514b3f68f00f494cf4f286491",
+    "0x205e795336610f5131be52f09218af19f0f3ec60",
+    "0xd784927ff2f95ba542bfc824c8a8a98f3495f6b5"
+]
 
 
 def debank_dataframe_from_pos_detail(chain, wallet, name, objeto):
@@ -100,7 +146,14 @@ def debank_dataframe_from_pos_detail(chain, wallet, name, objeto):
 def debank_protocol_api_call(wallet):
     complex_protocol_list = f"https://pro-openapi.debank.com/v1/user/all_complex_protocol_list?id={wallet}"
     headers = {"accept": "application/json", "AccessKey": ACCESS_KEY}
+    return (complex_protocol_list, headers)
+
+    print(f"request {wallet}")
+    start_time = time.time()
     response = requests.get(complex_protocol_list, headers=headers)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"request {wallet} took: {elapsed_time}s")
 
     if response.status_code == 200:
         data = response.json()
@@ -111,10 +164,7 @@ def debank_protocol_api_call(wallet):
         # print(response.text)
 
 
-def debank_protocol_to_df(input_data):
-    wallet = input_data[1]
-    data = input_data[0]
-
+def debank_protocol_to_df(data, wallet):
     debank_positions = pd.DataFrame()
 
     for element in data:
@@ -166,61 +216,52 @@ def debank_wallet_to_df(input_data):
     return df_wallet_w
 
 
+async def async_debank_protocol_api_call(wallet, session):
+    retry_count = 3
+    for _ in range(retry_count):
+        try:
+            url = f"https://pro-openapi.debank.com/v1/user/all_complex_protocol_list?id={wallet}"
+            headers = {"accept": "application/json", "AccessKey": ACCESS_KEY}
+            async with session.get(url, headers=headers) as response:
+                response.raise_for_status()
+                data = await response.json()
+                return data, wallet
+
+        except aiohttp.ClientError as e:
+            print(f"Error making request to {url}: {e}")
+            await asyncio.sleep(1)  # Add a delay before retrying
+
+    print(f"Failed to make request to {url} after {retry_count} retries.")
+    return None
+
+
+def debank_fetch_all(wallets):
+    async def do_call():
+        async with aiohttp.ClientSession() as session:
+            tasks = [async_debank_protocol_api_call(
+                wallet, session) for wallet in wallets]
+            results = await asyncio.gather(*tasks)
+
+        return results
+
+    results = asyncio.get_event_loop().run_until_complete(do_call())
+    return results
+
+
 def main_debank_etl(wallet=None):
-    start_time = time.time()
+    # start_time = time.time()
     if wallet is not None:
         wallets = [wallet]
     else:
-        wallets = [
-            "0x0efccbb9e2c09ea29551879bd9da32362b32fc89",
-            "0x616de58c011f8736fa20c7ae5352f7f6fb9f0669",
-            "0x4F2083f5fBede34C2714aFfb3105539775f7FE64",
-            "0x458cd345b4c05e8df39d0a07220feb4ec19f5e6f",
-            "0x4971dd016127f390a3ef6b956ff944d0e2e1e462",
-            "0x849d52316331967b6ff1198e5e32a0eb168d039d",
-            "0x10e4597ff93cbee194f4879f8f1d54a370db6969",
-            "0x58e6c7ab55aa9012eacca16d1ed4c15795669e1c",
-            "0x54e191b01aa9c1f61aa5c3bce8d00956f32d3e71",
-            "0x5ff85ecf773ea3885cb4b691068ab6d7bf8bda9a",
-            "0x048a5ecc705c280b2248aeff88fd581abbeb8587",
-            "0x9298dfD8A0384da62643c2E98f437E820029E75E",
-            "0x51d34416593a8acf4127dc4a40625a8efab9940c",
-            "0x43fd1f07da06b51097a697d4e3c7d369e2e3fd60",
-            "0x3e40d73eb977dc6a537af587d48316fee66e9c8c",
-            "0xca771eda0c70aa7d053ab1b25004559b918fe662",
-            "0xce91228789b57deb45e66ca10ff648385fe7093b",
-            "0xa1cb7762f40318ee0260f53e15de835ff001cb7e",
-            "0xc498e8063c95b65d97fe9172bf952bf1c8d33330",
-            "0xa03be496e67ec29bc62f01a428683d7f9c204930",
-            "0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6",
-            "0xfe89cc7abb2c4183683ab71653c4cdc9b02d44b7",
-            "0x283af0b28c62c092c9727f1ee09c02ca627eb7f5",
-            "0x253553366da8546fc250f225fe3d25d0c782303b",
-            "0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f",
-            "0xee071f4b516f69a1603da393cde8e76c40e5be85",
-            "0xaf23dc5983230e9eeaf93280e312e57539d098d0",
-            "0x570154c8c9f8cb35dc454f1cde33dc8fe30ecd63",
-            "0x1ca861c023b09efa4932d96f1b09de906ebbc4cd",
-            "0x0DA0C3e52C977Ed3cBc641fF02DD271c3ED55aFe",
-            "0x80d63b12aecf8ae5884cbf1d3536bb0c5f612cfc",
-            "0xd3cf852898b21fc233251427c2dc93d3d604f3bb",
-            "0xf51842ebf4dc1e6f89d74ab0768c670ab04d928b",
-            "0x23b4f73fb31e89b27de17f9c5de2660cc1fb0cdf",
-            "0x464c71f6c2f760dda6093dcb91c24c39e5d6e18c",
-            "0x053d55f9b5af8694c503eb288a1b7e552f590710",
-            "0xb2289e329d2f85f1ed31adbb30ea345278f21bcf",
-            "0xe8599f3cc5d38a9ad6f3684cd5cea72f10dbc383",
-            "0x5ba7fd868c40c16f7adfae6cf87121e13fc2f7a0",
-            "0x25f2226b597e8f9514b3f68f00f494cf4f286491",
-            "0x205e795336610f5131be52f09218af19f0f3ec60",
-            "0xd784927ff2f95ba542bfc824c8a8a98f3495f6b5",
-        ]
+        wallets = DEFAULT_WALLETS
 
     total_df = pd.DataFrame()
 
-    for wallet in wallets:
+    results = debank_fetch_all(wallets)
+
+    for (data, wallet) in results:
         try:
-            df1 = debank_protocol_to_df(debank_protocol_api_call(wallet))
+            df1 = debank_protocol_to_df(data, wallet)
 
             # df2 = debank_wallet_to_df(debank_wallet_api_call(wallet))
 
@@ -233,15 +274,14 @@ def main_debank_etl(wallet=None):
             return {'error en el procesamiento'}
             # print(f"Error procesando la wallet {wallet}: {e}")
 
-    end_time = time.time()
-    elapsed_time = end_time - start_time
+    # end_time = time.time()
+    # elapsed_time = end_time - start_time
     # print(f"La función debank_etl() tardó {elapsed_time} segundos en ejecutarse")
 
     return total_df
 
 
 def transform_position(row):
-
     try:
         if row['protocol_name'] == 'Aura' and row['position_type'] == 'Locked':
             return 'Locked AURA'
@@ -375,13 +415,11 @@ def get_debank_positions(wallet=None):
                                 how='left')
 
     # Coalesce after merge:
-
     second_merged_df['position'] = second_merged_df['lptoken_name'].fillna(
         second_merged_df['position'])
     second_merged_df = second_merged_df.drop(
         columns=['lptoken_name', 'protocol', 'lptoken_address', 'blockchain', 'contains_wsteth',	'nonfarming_position', 'position_id', 'dao'])
 
-    # second_merged_df.to_clipboard()
     json_data = second_merged_df.to_json(orient='records')
     return json_data
 
