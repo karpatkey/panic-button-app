@@ -17,6 +17,9 @@ def access_key():
     return os.getenv('DEBANK_API_KEY')
 
 
+ACCESS_KEY = access_key()
+
+
 def debank_dataframe_from_pos_detail(chain, wallet, name, objeto):
     """Genera un DataFrame a partir de un objeto JSON.
 
@@ -94,22 +97,11 @@ def debank_dataframe_from_pos_detail(chain, wallet, name, objeto):
     return df
 
 
-# wallet = '0x849D52316331967b6fF1198e5E32A0eB168D039d'
-
-
 def debank_protocol_api_call(wallet):
-    # chain = 'eth'
-    # URL de la API
     complex_protocol_list = f"https://pro-openapi.debank.com/v1/user/all_complex_protocol_list?id={wallet}"
-    # simple_protocol_list = f"https://pro-openapi.debank.com/v1/user/all_simple_protocol_list?id={wallet}"
-    # /v1/user/all_token_list
-    # Headers para la solicitud
-
-    # Realiza la solicitud GET
-    headers = {"accept": "application/json", "AccessKey": access_key()}
+    headers = {"accept": "application/json", "AccessKey": ACCESS_KEY}
     response = requests.get(complex_protocol_list, headers=headers)
 
-    # Verifica si la solicitud fue exitosa
     if response.status_code == 200:
         data = response.json()
         return data, wallet
@@ -141,7 +133,7 @@ def debank_wallet_api_call(wallet):
     wallet_list = f"https://pro-openapi.debank.com/v1/user/all_token_list?id={wallet}"
 
     # Headers para la solicitud
-    headers = {"accept": "application/json", "AccessKey": access_key()}
+    headers = {"accept": "application/json", "AccessKey": ACCESS_KEY}
 
     # Realiza la solicitud GET
     response = requests.get(wallet_list, headers=headers)
