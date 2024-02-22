@@ -104,9 +104,9 @@ def debank_protocol_api_call(wallet):
     # simple_protocol_list = f"https://pro-openapi.debank.com/v1/user/all_simple_protocol_list?id={wallet}"
     # /v1/user/all_token_list
     # Headers para la solicitud
-    headers = {"accept": "application/json", "AccessKey": access_key}
 
     # Realiza la solicitud GET
+    headers = {"accept": "application/json", "AccessKey": access_key()}
     response = requests.get(complex_protocol_list, headers=headers)
 
     # Verifica si la solicitud fue exitosa
