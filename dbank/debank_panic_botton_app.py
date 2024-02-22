@@ -7,6 +7,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import pandas as pd
 import requests
+import traceback
 
 
 load_dotenv()
@@ -236,6 +237,7 @@ def main_debank_etl(wallet=None):
             df1["datetime"] = datetime.now()
             total_df = pd.concat([total_df, df1], ignore_index=True)
         except Exception as e:
+            print(f"Error in main_debank_etl: {e}")
             return {'error en el procesamiento'}
             # print(f"Error procesando la wallet {wallet}: {e}")
 
@@ -263,6 +265,7 @@ def transform_position(row):
             return None  # O cualquier otro valor predeterminado que desees asignar
 
     except Exception as e:
+        print(f"Error in transform_position: {e}")
         return {f'transform_position failed on {e}'}
 
 
@@ -398,4 +401,5 @@ if __name__ == "__main__":
         # print('Python Get DeBank Data Worked')
     except Exception as e:
         # print ('Error:',e)
-        {f'process failed on error {e}'}
+        print(f"Error in main: {e}")
+        print(traceback.format_exc())
