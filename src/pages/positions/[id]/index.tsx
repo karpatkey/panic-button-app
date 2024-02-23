@@ -12,7 +12,8 @@ import {
   clearSelectedPosition,
   setSelectedPosition,
   updateEnvNetworkData,
-  updateStatus
+  updateStatus,
+  addDaosConfigs
 } from 'src/contexts/reducers'
 import { Position, Status } from 'src/contexts/state'
 import Loading from 'src/components/Loading'
@@ -21,11 +22,13 @@ import { FOOTER_HEIGHT } from 'src/components/Layout/Footer'
 import CustomTypography from 'src/components/CustomTypography'
 import Button from '@mui/material/Button'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
+import { getDaosConfigs } from 'src/utils/jsonsFetcher'
 
 interface PositionIndexProps {
   positionId: Maybe<string>
   position: Maybe<Position>
   ENV_NETWORK_DATA: any
+  daosConfigs: any[]
 }
 
 const PositionDoesntExist = () => {
@@ -42,13 +45,14 @@ const PositionDoesntExist = () => {
 }
 
 const PositionIndex = (props: PositionIndexProps): ReactElement => {
-  const { position, ENV_NETWORK_DATA } = props
+  const { position, ENV_NETWORK_DATA, daosConfigs } = props
 
   const { dispatch, state } = useApp()
   const { status } = state
 
   React.useEffect(() => {
     dispatch(updateStatus('Loading' as Status))
+    dispatch(addDaosConfigs(daosConfigs))
     if (!position) {
       dispatch(clearSelectedPosition())
     } else {
@@ -58,7 +62,7 @@ const PositionIndex = (props: PositionIndexProps): ReactElement => {
     dispatch(updateEnvNetworkData(ENV_NETWORK_DATA))
 
     dispatch(updateStatus('Finished' as Status))
-  }, [position, dispatch])
+  }, [position, dispatch, daosConfigs])
 
   return (
     <>
@@ -120,11 +124,14 @@ const getServerSideProps = async (context: {
     LOCAL_FORK_PORT_GNOSIS: process?.env?.LOCAL_FORK_PORT_GNOSIS ?? 8547
   }
 
+  const daosConfigs = await getDaosConfigs(roles)
+
   return {
     props: {
       positionId: id,
       position,
-      ENV_NETWORK_DATA
+      ENV_NETWORK_DATA,
+      daosConfigs
     }
   }
 }

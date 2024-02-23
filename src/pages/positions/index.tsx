@@ -21,6 +21,7 @@ import { getDaosConfigs } from 'src/utils/jsonsFetcher'
 interface PositionsPageProps {
   positions: Position[]
   DAOs: string[]
+  daosConfigs: any
 }
 
 const PositionsPage = (props: PositionsPageProps) => {
@@ -44,7 +45,7 @@ const PositionsPage = (props: PositionsPageProps) => {
     }
 
     start()
-  }, [dispatch, DAOs, positions])
+  }, [dispatch, DAOs, positions, daosConfigs])
 
   return <WrapperPositions />
 }

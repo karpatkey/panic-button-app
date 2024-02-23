@@ -25,11 +25,6 @@ const Card = (props: PositionProps) => {
   } = position
 
   const { state } = useApp()
-  // const existDAOFilePath = !!getDAOFilePath(
-  //   position.dao as DAO,
-  //   blockchain as BLOCKCHAIN,
-  //   'execute' as EXECUTION_TYPE
-  // )
 
   const { positionConfig } = getStrategy(state.daosConfigs, position as Position)
   const areAnyStrategies = positionConfig?.length > 0
