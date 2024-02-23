@@ -2,6 +2,7 @@ import { withApiAuthRequired } from '@auth0/nextjs-auth0'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSession, Session } from '@auth0/nextjs-auth0'
 import { dBankPromise } from 'src/utils/dbank'
+import { ALL_DAOS } from 'src/config/constants'
 
 type Status = {
   data?: Maybe<any>
@@ -30,7 +31,8 @@ export default withApiAuthRequired(async function handler(
   const user = (session as Session).user
   const roles = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
-    : ['']
+    : ALL_DAOS
+
   const dao = roles?.[0] ?? ''
 
   if (!dao) {

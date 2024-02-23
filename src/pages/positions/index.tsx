@@ -9,6 +9,7 @@ import { getSession, Session } from '@auth0/nextjs-auth0'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { updateStatus, addPositions, addDAOs, clearSearch, filter, updatePositionsWithTokenBalances, updateIsFetchingTokens } from 'src/contexts/reducers'
 import { Position, Status } from 'src/contexts/state'
+import { ALL_DAOS } from 'src/config/constants'
 
 interface PositionsPageProps {
   positions: Position[]
@@ -88,7 +89,7 @@ export const getServerSideProps = async (context: {
   const user = (session as Session).user
   const roles = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
-    : []
+    : ALL_DAOS
 
   const DAOs = roles
 
