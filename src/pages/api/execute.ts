@@ -9,6 +9,7 @@ import {
 } from 'src/config/strategies/manager'
 import { EXECUTION_TYPE } from 'src/config/strategies/manager'
 import { CommonExecutePromise } from 'src/utils/execute'
+import { ALL_DAOS } from 'src/config/constants'
 import { getDaosConfigs } from 'src/utils/jsonsFetcher'
 
 type Status = {
@@ -57,7 +58,7 @@ export default withApiAuthRequired(async function handler(
   const user = (session as Session).user
   const roles = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
-    : []
+    : ALL_DAOS
 
   const DAOs = roles
   if (!DAOs) {
@@ -84,12 +85,7 @@ export default withApiAuthRequired(async function handler(
 
   const daosConfigs = await getDaosConfigs(roles)
 
-  const filePath = getDAOFilePath(
-    daosConfigs,
-    dao as DAO,
-    blockchain as BLOCKCHAIN,
-    execution_type as EXECUTION_TYPE
-  )
+  const filePath = getDAOFilePath(execution_type as EXECUTION_TYPE)
 
   console.log('FilePath', filePath)
 
@@ -132,6 +128,7 @@ export default withApiAuthRequired(async function handler(
       // Add CONSTANTS from the strategy
       if (protocol) {
         const { positionConfig } = getStrategyByPositionId(
+          daosConfigs,
           dao as DAO,
           blockchain as unknown as BLOCKCHAIN,
           protocol,

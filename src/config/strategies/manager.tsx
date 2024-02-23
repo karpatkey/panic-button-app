@@ -129,11 +129,7 @@ export const getStrategyByPositionId = (
   } as ExecConfig
 }
 
-export const getDAOFilePath = (
-  _dao: DAO,
-  _blockchain: BLOCKCHAIN,
-  executionType: EXECUTION_TYPE
-) => {
+export const getDAOFilePath = (executionType: EXECUTION_TYPE) => {
   // const DAO_ITEM: DAO_MAPPER_TYPE | undefined = getStrategies(dao, blockchain)
   switch (executionType) {
     case 'execute':

@@ -15,7 +15,7 @@ import { DAOFilter } from 'src/components/DAOFilter'
 import { filter, setSearch } from 'src/contexts/reducers'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import { Position, Status } from 'src/contexts/state'
-import { BLOCKCHAIN, DAO, EXECUTION_TYPE, getDAOFilePath } from 'src/config/strategies/manager'
+import { EXECUTION_TYPE, getDAOFilePath } from 'src/config/strategies/manager'
 import { getStrategy } from 'src/utils/strategies'
 
 interface SearchPositionProps {
@@ -55,12 +55,8 @@ const WrapperPositions = () => {
 
   const filteredPositionsActive = filteredPositions
     .map((position: Position) => {
-      const existDAOFilePath = !!getDAOFilePath(
-        position.dao as DAO,
-        position.blockchain as BLOCKCHAIN,
-        'execute' as EXECUTION_TYPE
-      )
-      const { positionConfig } = getStrategy(position as Position)
+      const existDAOFilePath = !!getDAOFilePath('execute' as EXECUTION_TYPE)
+      const { positionConfig } = getStrategy(state.daosConfigs, position as Position)
       const areAnyStrategies = positionConfig?.length > 0
       const isActive = areAnyStrategies && existDAOFilePath
       return {
