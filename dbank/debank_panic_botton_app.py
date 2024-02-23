@@ -4,7 +4,7 @@ import os
 import time
 from datetime import datetime
 
-from dotenv import load_dotenv
+from decouple import config
 import pandas as pd
 import requests
 import traceback
@@ -12,11 +12,8 @@ import aiohttp
 import asyncio
 
 
-load_dotenv()
-
-
 def access_key():
-    return os.getenv('DEBANK_API_KEY')
+    return config('DEBANK_API_KEY')
 
 
 DEFAULT_WALLETS = [
