@@ -33,7 +33,7 @@ export default withApiAuthRequired(async function handler(
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
     : ALL_DAOS
 
-  const dao = roles?.[0] ?? ''
+  const dao = (ALL_DAOS[0] || roles?.[0]) ?? ''
 
   if (!dao) {
     res.status(401).json({ data: { status: false, error: new Error('Unauthorized') } })

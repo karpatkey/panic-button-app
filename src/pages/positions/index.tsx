@@ -60,7 +60,7 @@ const PositionsPage = (props: PositionsPageProps) => {
     }
 
     start()
-  }, [dispatch, status])
+  }, [dispatch, isFetchingTokens, status])
 
   return <WrapperPositions />
 }
@@ -89,9 +89,9 @@ export const getServerSideProps = async (context: {
   const user = (session as Session).user
   const roles = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
-    : ALL_DAOS
+    : []
 
-  const DAOs = roles
+  const DAOs = ALL_DAOS || roles
 
   const dataWarehouse = DataWarehouse.getInstance()
   const positions: Position[] = await dataWarehouse.getPositions(DAOs)
