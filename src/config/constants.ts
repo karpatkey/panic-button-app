@@ -32,6 +32,16 @@ export interface DAO {
   }[]
 }
 
+export const ALL_DAOS = [
+  'Gnosis DAO',
+  'Gnosis LTD',
+  'Balancer DAO',
+  'ENS DAO',
+  'CoW DAO',
+  'karpatkey DAO',
+  'Gnosis Guild'
+]
+
 export const DAO_LIST: DAO[] = [
   {
     id: DAO_NAME_KEY['Gnosis DAO'],

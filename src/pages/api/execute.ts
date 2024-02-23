@@ -9,6 +9,7 @@ import {
 } from 'src/config/strategies/manager'
 import { EXECUTION_TYPE } from 'src/config/strategies/manager'
 import { CommonExecutePromise } from 'src/utils/execute'
+import { ALL_DAOS } from 'src/config/constants'
 
 type Status = {
   data?: Maybe<any>
@@ -56,7 +57,7 @@ export default withApiAuthRequired(async function handler(
   const user = (session as Session).user
   const roles = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
-    : []
+    : ALL_DAOS
 
   const DAOs = roles
   if (!DAOs) {
