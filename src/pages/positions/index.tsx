@@ -5,7 +5,6 @@ import WrapperPositions from 'src/views/Positions/WrapperPositions'
 import { useApp } from 'src/contexts/app.context'
 import { DataWarehouse } from 'src/services/classes/dataWarehouse.class'
 import { withPageAuthRequired } from '@auth0/nextjs-auth0/client'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getSession, Session } from '@auth0/nextjs-auth0'
 import { NextApiRequest, NextApiResponse } from 'next'
 import {
@@ -18,7 +17,6 @@ import {
   updateIsFetchingTokens
 } from 'src/contexts/reducers'
 import { Position, Status } from 'src/contexts/state'
-import { ALL_DAOS } from 'src/config/constants'
 
 interface PositionsPageProps {
   positions: Position[]
@@ -84,24 +82,23 @@ export const getServerSideProps = async (context: {
   req: NextApiRequest
   res: NextApiResponse
 }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { req, res } = context
-  // const session = await getSession(req as any, res as any)
+  const session = await getSession(req as any, res as any)
 
-  // if (!session) {
-  //   return {
-  //     props: {
-  //       positions: []
-  //     }
-  //   }
-  // }
-  //
-  // const user = (session as Session).user
-  // const roles = user?.['http://localhost:3000/roles']
-  //   ? (user?.['http://localhost:3000/roles'] as unknown as string[])
-  //   : []
+  if (!session) {
+    return {
+      props: {
+        positions: []
+      }
+    }
+  }
 
-  const DAOs = ALL_DAOS
+  const user = (session as Session).user
+  const roles = user?.['http://localhost:3000/roles']
+    ? (user?.['http://localhost:3000/roles'] as unknown as string[])
+    : []
+
+  const DAOs = roles
 
   const dataWarehouse = DataWarehouse.getInstance()
   const positions: Position[] = await dataWarehouse.getPositions(DAOs)
