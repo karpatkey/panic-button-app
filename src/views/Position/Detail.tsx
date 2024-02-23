@@ -7,17 +7,17 @@ import Secondary from 'src/views/Position/Title/Secondary'
 import NoStrategies from 'src/views/Position/NoStrategies'
 import { useApp } from 'src/contexts/app.context'
 import { getStrategy } from 'src/utils/strategies'
-import { Position } from 'src/contexts/state'
+// import { Position } from 'src/contexts/state'
 
 const Detail = () => {
   const { state } = useApp()
-  const { selectedPosition: position, status } = state
+  const { selectedPosition: position, daosConfigs, status } = state
 
   if (status !== 'Finished' || !position) {
     return null
   }
 
-  const { positionConfig } = getStrategy(position as Position)
+  const { positionConfig } = getStrategy(daosConfigs, position)
   const areAnyStrategies = positionConfig?.length > 0
 
   return (

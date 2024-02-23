@@ -36,7 +36,7 @@ const CustomForm = (props: CustomFormProps) => {
   const { dispatch, state } = useApp()
   const { selectedPosition: position } = state
 
-  const { positionConfig, commonConfig } = getStrategy(position as Position)
+  const { positionConfig, commonConfig } = getStrategy(state.daosConfigs, position as Position)
 
   const [keyIndex, setKeyIndex] = React.useState(1)
   // If we don't do this, the application will rerender every time

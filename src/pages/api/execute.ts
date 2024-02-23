@@ -9,6 +9,7 @@ import {
 } from 'src/config/strategies/manager'
 import { EXECUTION_TYPE } from 'src/config/strategies/manager'
 import { CommonExecutePromise } from 'src/utils/execute'
+import { getDaosConfigs } from 'src/utils/jsonsFetcher'
 
 type Status = {
   data?: Maybe<any>
@@ -81,7 +82,10 @@ export default withApiAuthRequired(async function handler(
     parameters.push(`${blockchain.toUpperCase()}`)
   }
 
+  const daosConfigs = await getDaosConfigs(roles)
+
   const filePath = getDAOFilePath(
+    daosConfigs,
     dao as DAO,
     blockchain as BLOCKCHAIN,
     execution_type as EXECUTION_TYPE

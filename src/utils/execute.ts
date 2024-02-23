@@ -18,7 +18,7 @@ export const CommonExecutePromise = (
       const python = spawn(`python3`, [`${scriptFile}`, ...parameters])
 
       let buffer = ''
-      python.stdout.on('data', function (data) {
+      python.stdout.on('data', function(data) {
         buffer += data.toString()
 
         if (buffer.indexOf('DEBUGGER READY') !== -1) {
@@ -27,17 +27,17 @@ export const CommonExecutePromise = (
         }
       })
 
-      python.stderr.on('data', function (data) {
+      python.stderr.on('data', function(data) {
         console.log('STD_ERR', data.toString())
       })
 
-      python.on('error', function (data) {
+      python.on('error', function(data) {
         console.log('DEBUG PROGRAM ERROR:')
         console.error('ERROR: ', data.toString())
         reject({ status: 500, error: new Error(data.toString()) })
       })
 
-      python.on('exit', function (code) {
+      python.on('exit', function(code) {
         console.log('Debug Program Exit', code)
 
         // destroy python process

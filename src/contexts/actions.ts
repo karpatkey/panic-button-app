@@ -26,7 +26,8 @@ export enum ActionType {
   ClearSetup,
   ClearSetupWithoutCreate,
   UpdateEnvNetworkData,
-  Filter
+  Filter,
+  AddDaosConfigs
 }
 
 export interface UpdateStatus {
@@ -137,6 +138,7 @@ export interface SetSetupStatus {
 export interface ClearSetup {
   type: ActionType.ClearSetup
 }
+
 export interface ClearSetupWithoutCreate {
   type: ActionType.ClearSetupWithoutCreate
 }
@@ -148,6 +150,11 @@ export interface UpdateEnvNetworkData {
 
 export interface Filter {
   type: ActionType.Filter
+}
+
+export interface AddDaosConfigs {
+  type: ActionType.AddDaosConfigs
+  payload: any[]
 }
 
 export type Actions =
@@ -177,3 +184,4 @@ export type Actions =
   | ClearSetupWithoutCreate
   | UpdateEnvNetworkData
   | Filter
+  | AddDaosConfigs
