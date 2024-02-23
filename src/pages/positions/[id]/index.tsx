@@ -23,7 +23,6 @@ import CustomTypography from 'src/components/CustomTypography'
 import Button from '@mui/material/Button'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import { getDaosConfigs } from 'src/utils/jsonsFetcher'
-import { ALL_DAOS } from 'src/config/constants'
 
 interface PositionIndexProps {
   positionId: Maybe<string>
@@ -106,7 +105,7 @@ const getServerSideProps = async (context: {
   const user = (session as Session).user
   const roles = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
-    : ALL_DAOS
+    : []
 
   const DAOs = roles
 
