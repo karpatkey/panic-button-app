@@ -43,6 +43,7 @@ import {
 } from './actions'
 import { BLOCKCHAIN, DAO, EXECUTION_TYPE, getDAOFilePath } from '../config/strategies/manager'
 import { getStrategy } from '../utils/strategies'
+import { daoWallets } from 'src/config/constants'
 
 export const mainReducer = (state: InitialState, action: Actions): InitialState => {
   switch (action.type) {
@@ -369,9 +370,15 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
 
     case ActionType.UpdatePositionsWithTokenBalances:
       const dBankData = action.payload
+      const walletsByDAO: { [key: string]: string[] } = state.DAOs.reduce(
+        (acc, dao) => ({ ...acc, [dao]: daoWallets(dao) }),
+        {}
+      )
       const positionsWithTokens = state?.positions?.map((position: Position) => {
+        const wallets = walletsByDAO[position.dao] || []
         const dBankTokens: DBankInfo[] =
           dBankData?.filter((dbankInfo: DBankInfo) => {
+            if (!wallets.includes(dbankInfo.wallet)) return false
             // should match by dBandk properties chain, protocol_name, position
             return (
               dbankInfo?.chain?.toLowerCase() === position.blockchain.toLowerCase() &&
