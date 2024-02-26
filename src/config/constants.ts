@@ -42,6 +42,12 @@ export const ALL_DAOS = [
   'Gnosis Guild'
 ]
 
+export function daoWallets(dao: string) {
+  const config = DAO_LIST.find((d) => d.keyName == dao)
+  if (!config) return []
+  return config.addresses.map((a) => a.address)
+}
+
 export const DAO_LIST: DAO[] = [
   {
     id: DAO_NAME_KEY['Gnosis DAO'],

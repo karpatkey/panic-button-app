@@ -6,12 +6,12 @@ interface DBankReturn {
   error?: Maybe<string>
 }
 
-export const dBankPromise = (): Promise<DBankReturn> => {
+export const dBankPromise = (parameters: string[] = []): Promise<DBankReturn> => {
   return new Promise((resolve, reject) => {
     try {
       const scriptFile = path.resolve(process.cwd(), 'dbank/debank_panic_botton_app.py')
 
-      const python = spawn(`python3`, [`${scriptFile}`])
+      const python = spawn(`python3`, [`${scriptFile}`, ...parameters])
 
       let buffer = ''
       python.stdout.on('data', function (data) {

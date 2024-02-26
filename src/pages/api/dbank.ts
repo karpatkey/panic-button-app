@@ -2,6 +2,7 @@ import { withApiAuthRequired } from '@auth0/nextjs-auth0'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSession, Session } from '@auth0/nextjs-auth0'
 import { dBankPromise } from 'src/utils/dbank'
+import { daoWallets } from 'src/config/constants'
 
 type Status = {
   data?: Maybe<any>
@@ -39,8 +40,11 @@ export default withApiAuthRequired(async function handler(
     return
   }
 
+  const wallets = roles.flatMap((dao) => daoWallets(dao))
+
   try {
-    const { data, error } = await dBankPromise()
+    const parameters = ['--wallets', wallets.join(',')]
+    const { data, error } = await dBankPromise(parameters)
 
     if (error) {
       return res.status(500).json({ error })

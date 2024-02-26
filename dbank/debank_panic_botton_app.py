@@ -1,4 +1,4 @@
-
+import argparse
 import json
 import os
 import time
@@ -58,7 +58,7 @@ DEFAULT_WALLETS = [
     "0x5ba7fd868c40c16f7adfae6cf87121e13fc2f7a0",
     "0x25f2226b597e8f9514b3f68f00f494cf4f286491",
     "0x205e795336610f5131be52f09218af19f0f3ec60",
-    "0xd784927ff2f95ba542bfc824c8a8a98f3495f6b5"
+    "0xd784927ff2f95ba542bfc824c8a8a98f3495f6b5",
 ]
 
 
@@ -244,11 +244,9 @@ def debank_fetch_all(wallets):
     return results
 
 
-def main_debank_etl(wallet=None):
+def main_debank_etl(wallets=[]):
     # start_time = time.time()
-    if wallet is not None:
-        wallets = [wallet]
-    else:
+    if not wallets:
         wallets = DEFAULT_WALLETS
 
     total_df = pd.DataFrame()
@@ -323,7 +321,7 @@ def transform_chain(chain):
     return chain_mapping.get(chain, chain)
 
 
-def get_debank_positions(wallet=None):
+def get_debank_positions(wallets=[]):
     """
     Retrieves and transforms DeBank positions data for a given wallet.
 
@@ -345,7 +343,7 @@ def get_debank_positions(wallet=None):
     >>>
     """
 
-    df = main_debank_etl(wallet=wallet)
+    df = main_debank_etl(wallets=wallets)
     # Filter protocols:
     # print(df)
     protocols = ['Aura Finance', 'LIDO', 'Balancer V2']
@@ -420,12 +418,26 @@ def get_debank_positions(wallet=None):
     return json_data
 
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument("-w", "--wallets", type=str,
+                        help="DAO whose funds are to be removed.", default="")
+
+    args = parser.parse_args()
+    wallets = args.wallets.split(",")
+    wallets = list(filter(None, wallets))
+
     try:
-        data_json = get_debank_positions()
+        data_json = get_debank_positions(wallets)
         print(data_json)
         # print('Python Get DeBank Data Worked')
     except Exception as e:
         # print ('Error:',e)
         print(f"Error in main: {e}")
         print(traceback.format_exc())
+
+
+if __name__ == "__main__":
+    main()
