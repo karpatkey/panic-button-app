@@ -416,6 +416,7 @@ export const mainReducer = (state: InitialState, action: Actions): InitialState 
 
       return {
         ...state,
+        loadedDebank: true,
         positions: positionsWithTokens
       }
 

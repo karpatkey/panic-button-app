@@ -19,7 +19,7 @@ const PositionsPage = (props: PositionsPageProps) => {
   const { positions = [], DAOs } = props
 
   const { dispatch, state } = useApp()
-  const { status, isFetchingTokens } = state
+  const { status, loadedDebank, isFetchingTokens } = state
 
   React.useEffect(() => {
     const start = () => {
@@ -39,6 +39,7 @@ const PositionsPage = (props: PositionsPageProps) => {
   React.useEffect(() => {
     const start = async () => {
       try {
+        if (loadedDebank) return
         if (status !== 'Finished') return
 
         console.log('fetching tokens', isFetchingTokens, status)
@@ -59,7 +60,7 @@ const PositionsPage = (props: PositionsPageProps) => {
     }
 
     start()
-  }, [dispatch, isFetchingTokens, status])
+  }, [dispatch, isFetchingTokens, loadedDebank, status])
 
   return <WrapperPositions />
 }
