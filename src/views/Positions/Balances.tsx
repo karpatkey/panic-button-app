@@ -6,6 +6,7 @@ import { Title } from './Title'
 import { USD } from './USD'
 import { useApp } from 'src/contexts/app.context'
 import { Token } from '../../contexts/state'
+import { AmountValue } from './AmountValue'
 
 interface ListItemsProps {
   tokens: Token[] | undefined
@@ -35,9 +36,9 @@ export const Balances = ({ tokens }: ListItemsProps) => {
                 <>
                   <BoxWrapperRow sx={{ justifyContent: 'space-between' }}>
                     <Title title="Supply" />
-                    <Title title={supply + ''} />
+                    <AmountValue value={supply} />
                   </BoxWrapperRow>
-                  <USD value={supply * price + ''} />
+                  <USD value={supply * price} />
                   <Divider />
                 </>
               ) : null}
@@ -45,9 +46,9 @@ export const Balances = ({ tokens }: ListItemsProps) => {
                 <>
                   <BoxWrapperRow sx={{ justifyContent: 'space-between' }}>
                     <Title title="Borrow" />
-                    <Title title={borrow + ''} />
+                    <AmountValue value={borrow} />
                   </BoxWrapperRow>
-                  <USD value={borrow * price + ''} />
+                  <USD value={borrow * price} />
                   <Divider />
                 </>
               ) : null}
