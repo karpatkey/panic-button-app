@@ -32,6 +32,22 @@ export interface DAO {
   }[]
 }
 
+export const ALL_DAOS = [
+  'Gnosis DAO',
+  'Gnosis LTD',
+  'Balancer DAO',
+  'ENS DAO',
+  'CoW DAO',
+  'karpatkey DAO',
+  'Gnosis Guild'
+]
+
+export function daoWallets(dao: string): string[] {
+  const config = DAO_LIST.find((d) => d.keyName == dao)
+  if (!config) return []
+  return config.addresses.flatMap((a) => a.address)
+}
+
 export const DAO_LIST: DAO[] = [
   {
     id: DAO_NAME_KEY['Gnosis DAO'],
