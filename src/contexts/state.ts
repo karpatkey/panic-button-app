@@ -91,6 +91,7 @@ export const initialState: InitialState = {
   selectedDAO: null,
   isFetchingTokens: false,
   envNetworkData: null,
+  loadedDebank: false,
   setup: {
     status: SetupStatus.Loading,
     create: {
@@ -128,6 +129,7 @@ export type InitialState = {
   selectedState: Maybe<State>
   isFetchingTokens: boolean
   envNetworkData: Maybe<any>
+  loadedDebank: boolean
   setup: {
     status: SetupStatus
     create: {
