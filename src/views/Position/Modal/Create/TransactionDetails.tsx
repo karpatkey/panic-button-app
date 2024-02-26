@@ -160,7 +160,7 @@ export const TransactionDetails = () => {
           dispatch(setSetupStatus('transaction_check' as SetupStatus))
         }
 
-        if (status === 500) {
+        if (status === 500 || response?.status === 401) {
           // Don't allow to simulate or execute transaction
           const errorMessage =
             typeof body?.error === 'string' ? body?.error : 'Error decoding transaction'

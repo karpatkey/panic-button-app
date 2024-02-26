@@ -80,7 +80,7 @@ export const getServerSideProps = async (context: {
 
   const dataWarehouse = DataWarehouse.getInstance()
   const positions: Position[] = await dataWarehouse.getPositions(DAOs)
-  const daosConfigs = await getDaosConfigs(roles)
+  const daosConfigs = await getDaosConfigs(DAOs)
 
   return { props: { positions, DAOs, daosConfigs } }
 }

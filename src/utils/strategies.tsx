@@ -13,7 +13,3 @@ export const getStrategy = (daosConfigs: any[], position: Position) => {
   )
   return config
 }
-
-// export async function positionWithStrategies(position: Position) {
-//   return { ...position, hasStrategies: false }
-// }
