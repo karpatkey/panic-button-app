@@ -32,7 +32,6 @@ const Card = (props: PositionProps) => {
         sx={{
           padding: '10px',
           width: '100%',
-          height: '100%',
           justifyContent: 'space-between',
           ...(isActive ? { cursor: 'pointer' } : {}),
           ...(!isActive ? { opacity: '0.2 !important' } : {})
