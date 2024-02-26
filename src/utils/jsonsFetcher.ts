@@ -32,8 +32,11 @@ const DAO_NAME_MAPPER = {
 } as any
 
 export async function getDaosConfigs(daos: string[]) {
-  const configs = await cachedFetchJsons()
-  // console.log('configs', JSON.stringify(configs[0], null, 2))
+  const label = 'Fetch json configs'
+  console.time(label)
+  const configs = await fetchJsons()
+  console.timeEnd(label)
+
   if (!configs) {
     return []
   }
@@ -47,30 +50,6 @@ export async function getDaosConfigs(daos: string[]) {
     .filter((f) => {
       return daos.includes(f.dao)
     })
-}
-
-const REFRESH_AFTER = 10 * 60 * 1000 // 10 minutes
-let LAST_REFRESH = +new Date() - REFRESH_AFTER - 100
-let CACHE: File[] | null
-
-function invalidCache() {
-  return LAST_REFRESH < +new Date() - REFRESH_AFTER
-}
-
-async function refreshCache() {
-  if (invalidCache()) {
-    CACHE = await fetchJsons()
-    LAST_REFRESH = +new Date()
-  }
-}
-
-export async function cachedFetchJsons() {
-  if (CACHE) {
-    refreshCache()
-  } else {
-    await refreshCache()
-  }
-  return CACHE
 }
 
 async function fetchJsons(): Promise<File[]> {
@@ -103,5 +82,5 @@ async function fetchJsons(): Promise<File[]> {
     return pro.then((str: any) => JSON.parse(str))
   })
 
-  return Promise.all(res)
+  return await Promise.all(res)
 }
