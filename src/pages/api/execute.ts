@@ -82,11 +82,9 @@ export default withApiAuthRequired(async function handler(
     parameters.push(`${blockchain.toUpperCase()}`)
   }
 
-  const daosConfigs = await getDaosConfigs(roles)
+  const daosConfigs = await getDaosConfigs([dao || ''])
 
   const filePath = getDAOFilePath(execution_type as EXECUTION_TYPE)
-
-  console.log('FilePath', filePath)
 
   if (execution_type === 'transaction_builder') {
     try {
