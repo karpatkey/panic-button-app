@@ -21,7 +21,7 @@ const PercentageNumberFormat = React.forwardRef<
       getInputRef={ref}
       allowNegative={false}
       valueIsNumericString
-      decimalScale={2}
+      decimalScale={3}
     />
   )
 })

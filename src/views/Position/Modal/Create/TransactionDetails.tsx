@@ -16,6 +16,7 @@ import * as React from 'react'
 import { AccordionWrapper } from 'src/components/Accordion/AccordionWrapper'
 import { useApp } from 'src/contexts/app.context'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
+import TextLoadingDots from 'src/components/TextLoadingDots'
 import {
   setSetupStatus,
   setSetupTransactionBuild,
@@ -28,6 +29,7 @@ import { shortenAddress } from 'src/utils/string'
 import { formatUnits } from 'ethers'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import StatusLabel from 'src/components/StatusLabel'
 
 const LABEL_MAPPER = {
   value: {
@@ -68,17 +70,15 @@ const WaitingDecodingTransaction = () => {
   return (
     <Box sx={{ width: '100%', paddingTop: '16px', paddingBottom: '16px' }}>
       <CustomTypography variant={'subtitle1'} sx={{ color: 'black' }}>
-        Waiting for decoding transaction process...
+        Waiting for transaction building process
+        <TextLoadingDots />
       </CustomTypography>
     </Box>
   )
 }
 
 export const TransactionDetails = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { dispatch, state } = useApp()
-
-  const [isLoading, setIsLoading] = React.useState(false)
 
   const transactionBuildValue = state?.setup?.transactionBuild?.value ?? null
   const transactionBuildStatus = state?.setup?.transactionBuild?.status ?? null
@@ -87,6 +87,8 @@ export const TransactionDetails = () => {
 
   const [error, setError] = React.useState<Maybe<Error>>(null)
   const [expanded, setExpanded] = React.useState('panel1')
+
+  const isLoading = transactionBuildStatus == 'loading'
 
   React.useEffect(() => {
     if (!formValue || transactionBuildStatus !== 'not done' || isLoading) {
@@ -126,7 +128,7 @@ export const TransactionDetails = () => {
 
     const postData = async (data: any) => {
       try {
-        setIsLoading(true)
+        dispatch(setSetupTransactionBuildStatus('loading' as SetupItemStatus))
         const response = await fetch('/api/execute', {
           method: 'POST',
           headers: {
@@ -187,11 +189,10 @@ export const TransactionDetails = () => {
         dispatch(setSetupTransactionCheckStatus('failed' as SetupItemStatus))
         dispatch(setSetupTransactionBuildStatus('failed' as SetupItemStatus))
       }
-      setIsLoading(false)
     }
 
     postData(parameters)
-  }, [formValue, dispatch])
+  }, [dispatch, formValue, isLoading, selectedDAO, transactionBuildStatus])
 
   const parameters = React.useMemo(() => {
     if (!transactionBuildValue) return []
@@ -217,7 +218,7 @@ export const TransactionDetails = () => {
       .filter(({ value }) => value)
   }, [transactionBuildValue])
 
-  const handleChange = (panel: any) => (event: any, newExpanded: any) => {
+  const handleChange = (panel: any) => (_event: any, newExpanded: any) => {
     setExpanded(newExpanded ? panel : false)
   }
 
@@ -229,7 +230,13 @@ export const TransactionDetails = () => {
         sx={{ width: '100%' }}
       >
         <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
+          expandIcon={
+            transactionBuildStatus == 'loading' ? (
+              <StatusLabel status={transactionBuildStatus} />
+            ) : (
+              <ExpandMoreIcon />
+            )
+          }
           aria-controls="panel1a-content"
           id="panel1a-header"
         >

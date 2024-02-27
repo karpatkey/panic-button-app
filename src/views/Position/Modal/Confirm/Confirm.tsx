@@ -5,16 +5,19 @@ import { AccordionBoxWrapper } from 'src/components/Accordion/AccordionBoxWrappe
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import { SetupItemStatus, SetupStatus } from 'src/contexts/state'
 import { useApp } from 'src/contexts/app.context'
-import { Box } from '@mui/material'
+import { Box, Link } from '@mui/material'
 import { setSetupConfirm, setSetupConfirmStatus, setSetupStatus } from 'src/contexts/reducers'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import { ethers, TransactionReceipt } from 'ethers'
+import StatusLabel from 'src/components/StatusLabel'
+import TextLoadingDots from 'src/components/TextLoadingDots'
 
 const WaitingExecutingTransaction = () => {
   return (
     <Box sx={{ width: '100%', paddingTop: '16px', paddingBottom: '16px' }}>
       <CustomTypography variant={'subtitle1'} sx={{ color: 'black' }}>
-        Executing transaction...
+        Executing transaction
+        <TextLoadingDots />
       </CustomTypography>
     </Box>
   )
@@ -25,10 +28,8 @@ interface ConfirmProps {
 }
 
 export const Confirm = ({ handleClose }: ConfirmProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { dispatch, state } = useApp()
 
-  const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<Error | null>(null)
 
   const { blockchain } = state?.setup?.create?.value ?? {}
@@ -39,6 +40,8 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
   const confirmStatus = state?.setup?.confirm?.status ?? null
   const txHash = state?.setup?.confirm?.value?.txHash ?? null
   const selectedDAO = state?.selectedPosition?.dao ?? null
+
+  const isLoading = confirmStatus == 'loading'
 
   // Get env network data
   const ENV_NETWORK_DATA = state?.envNetworkData ?? {}
@@ -51,7 +54,14 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       !decodedTransaction ||
       transactionBuildStatus !== 'success' ||
       transactionCheckStatus !== 'success',
-    [blockchain, transaction, decodedTransaction, transactionBuildStatus, transactionCheckStatus]
+    [
+      selectedDAO,
+      blockchain,
+      transaction,
+      decodedTransaction,
+      transactionBuildStatus,
+      transactionCheckStatus
+    ]
   )
 
   const onExecute = React.useCallback(async () => {
@@ -61,10 +71,8 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       }
 
       dispatch(setSetupConfirm(null))
-      dispatch(setSetupConfirmStatus('not done' as SetupItemStatus))
-      dispatch(setSetupStatus('simulation' as SetupStatus))
-
-      setIsLoading(true)
+      dispatch(setSetupConfirmStatus('loading' as SetupItemStatus))
+      dispatch(setSetupStatus('confirm' as SetupStatus))
 
       const parameters = {
         execution_type: 'execute',
@@ -132,9 +140,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       setError(err as Error)
       dispatch(setSetupConfirmStatus('failed' as SetupItemStatus))
     }
-
-    setIsLoading(false)
-  }, [blockchain, selectedDAO, transaction, dispatch, isDisabled])
+  }, [isDisabled, dispatch, transaction, blockchain, selectedDAO, ENV_NETWORK_DATA])
 
   return (
     <AccordionBoxWrapper
@@ -146,7 +152,10 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
     >
       <BoxWrapperColumn gap={4} sx={{ width: '100%', marginY: '14px', justifyContent: 'center' }}>
         <BoxWrapperColumn gap={2}>
-          <CustomTypography variant={'body2'}>Confirmation</CustomTypography>
+          <BoxWrapperRow sx={{ justifyContent: 'space-between' }}>
+            <CustomTypography variant={'body2'}>Confirmation</CustomTypography>
+            {isLoading && <StatusLabel status={'loading' as SetupItemStatus} />}
+          </BoxWrapperRow>
           {confirmStatus !== ('success' as SetupItemStatus) && !isLoading && (
             <CustomTypography variant={'subtitle1'}>
               You're about to create and confirm this transaction.
@@ -198,7 +207,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
               </Button>
             )}
             {confirmStatus === ('success' as SetupItemStatus) && !isLoading && (
-              <Button variant="contained" size="small" onClick={() => handleClose()}>
+              <Button variant="contained" size="small" component={Link} href={`/positions`}>
                 Finish
               </Button>
             )}

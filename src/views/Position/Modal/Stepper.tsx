@@ -8,8 +8,14 @@ import CustomTypography from 'src/components/CustomTypography'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import { useApp } from 'src/contexts/app.context'
 import { SetupStatus } from 'src/contexts/state'
+import { LoopOutlined } from '@mui/icons-material'
 
-const steps = [
+type Step = {
+  key: string
+  label: string
+}
+
+const steps: Step[] = [
   {
     key: 'create',
     label: 'Overview'
@@ -32,18 +38,51 @@ const steps = [
   }
 ]
 
+const LoadingStepIcon = () => (
+  <LoopOutlined
+    sx={{
+      animation: 'spin 2s linear infinite',
+      '@keyframes spin': {
+        '0%': {
+          transform: 'rotate(360deg)'
+        },
+        '100%': {
+          transform: 'rotate(0deg)'
+        }
+      }
+    }}
+  />
+)
+
 export const Stepper = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { dispatch, state } = useApp()
+  const { state } = useApp()
 
   const status = state?.setup?.status ?? ('create' as SetupStatus)
-  const activeStep = React.useMemo(
-    () =>
-      steps.findIndex((step) => {
+  const activeStep = React.useMemo(() => {
+    if (status == 'confirm' && state?.setup?.confirm?.status == 'success') {
+      // "last" step after successful execution
+      return steps.length
+    } else {
+      return steps.findIndex((step) => {
         return step.key === status
-      }),
-    [status]
-  )
+      })
+    }
+  }, [status, state?.setup?.confirm?.status])
+
+  const isStepLoading = (step: Step) => {
+    switch (step.key) {
+      case 'transaction_build':
+        return state?.setup?.transactionBuild?.status == 'loading'
+      case 'transaction_check':
+        return state?.setup?.transactionCheck?.status == 'loading'
+      case 'simulation':
+        return state?.setup?.simulation?.status == 'loading'
+      case 'confirm':
+        return state?.setup?.confirm?.status == 'loading'
+    }
+    return false
+  }
 
   return (
     <Box sx={{ backgroundColor: 'white', borderRadius: '8px' }}>
@@ -67,7 +106,7 @@ export const Stepper = () => {
       <StepperMUI activeStep={activeStep} orientation="vertical" sx={{ m: 3 }}>
         {steps.map((step) => (
           <Step key={step.label}>
-            <StepLabel>
+            <StepLabel icon={isStepLoading(step) && <LoadingStepIcon />}>
               <CustomTypography
                 variant="body2"
                 sx={{
@@ -83,7 +122,7 @@ export const Stepper = () => {
           </Step>
         ))}
       </StepperMUI>
-      {activeStep === steps.length && (
+      {false && activeStep === steps.length && (
         <Paper square elevation={0} sx={{ p: 3 }}>
           <CustomTypography variant={'h6'} sx={{ m: 3 }}>
             All steps completed - you&apos;re finished

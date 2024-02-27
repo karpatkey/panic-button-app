@@ -36,6 +36,7 @@ export type TransactionBuild = {
 
 export enum SetupItemStatus {
   NotDone = 'not done',
+  Loading = 'loading',
   Failed = 'failed',
   Success = 'success'
 }

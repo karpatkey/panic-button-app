@@ -90,7 +90,7 @@ export const SetupDetails = () => {
 
   return (
     <BoxWrapperRow gap={2} sx={{ m: 3, backgroundColor: 'custom.grey.light' }}>
-      <AccordionWrapper sx={{ width: '100%' }}>
+      <AccordionWrapper defaultExpanded sx={{ width: '100%' }}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"

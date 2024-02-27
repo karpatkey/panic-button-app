@@ -1,24 +1,17 @@
 import CustomTypography from 'src/components/CustomTypography'
+import StatusLabel from 'src/components/StatusLabel'
 import * as React from 'react'
 import { AccordionBoxWrapper } from 'src/components/Accordion/AccordionBoxWrapper'
 import { useApp } from 'src/contexts/app.context'
-import { SetupItemStatus } from 'src/contexts/state'
 import Tooltip from '@mui/material/Tooltip'
 import InfoIcon from '@mui/icons-material/Info'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 
 export const TransactionCheck = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { dispatch, state } = useApp()
+  const { state } = useApp()
 
   const transactionCheckStatus = state?.setup?.transactionCheck?.status || null
 
-  const color =
-    transactionCheckStatus === ('success' as SetupItemStatus)
-      ? 'green'
-      : transactionCheckStatus === ('failed' as SetupItemStatus)
-        ? 'red'
-        : 'black'
   return (
     <AccordionBoxWrapper
       gap={2}
@@ -42,9 +35,7 @@ export const TransactionCheck = () => {
           <InfoIcon sx={{ fontSize: 24, cursor: 'pointer' }} />
         </Tooltip>
       </BoxWrapperRow>
-      <CustomTypography variant={'body2'} sx={{ color, textTransform: 'capitalize' }}>
-        {transactionCheckStatus}
-      </CustomTypography>
+      <StatusLabel status={transactionCheckStatus} />
     </AccordionBoxWrapper>
   )
 }

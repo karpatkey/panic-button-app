@@ -259,7 +259,7 @@ const CustomForm = (props: CustomFormProps) => {
                           }
                         }
                       }}
-                      minValue={min || 0}
+                      minValue={0}
                       maxValue={max || 100}
                       placeholder={
                         PARAMETERS_CONFIG[name as DEFAULT_VALUES_KEYS].placeholder as string

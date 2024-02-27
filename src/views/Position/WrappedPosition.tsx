@@ -11,7 +11,7 @@ import { FOOTER_HEIGHT } from 'src/components/Layout/Footer'
 const WrappedPosition = () => {
   const { state } = useApp()
   const { status } = state
-  const title = `Exit strategy configuration`
+  const title = `Strategy configuration`
 
   return (
     <ErrorBoundaryWrapper>
