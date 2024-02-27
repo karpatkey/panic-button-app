@@ -1,4 +1,5 @@
 import { Session, getSession, withApiAuthRequired } from '@auth0/nextjs-auth0'
+import { ethers } from 'ethers'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import {
   BLOCKCHAIN,
@@ -15,6 +16,8 @@ type Status = {
   status?: Maybe<number>
   error?: Maybe<string>
 }
+
+const WEB3SIGNER_URL = process.env.WEB3SIGNER_URL
 
 // Create a mapper for DAOs
 const DAO_MAPPER: Record<string, string> = {
@@ -66,6 +69,11 @@ export default withApiAuthRequired(async function handler(
 
   if (dao && !DAOs.includes(dao)) {
     res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+
+  if (!blockchain) {
+    res.status(400).json({ error: 'Invalid params' })
     return
   }
 
@@ -170,12 +178,12 @@ export default withApiAuthRequired(async function handler(
 
       return res.status(200).json({ data, status, error })
     } catch (error) {
-      console.error('ERROR Reject: ', error)
+      console.error('TRANSACTION_BUILDER_ERROR: ', error)
       return res.status(500).json({ error: (error as Error)?.message, status: 500 })
     }
   }
 
-  if (execution_type === 'simulate' || execution_type === 'execute') {
+  if (execution_type === 'simulate' || (execution_type === 'execute' && !WEB3SIGNER_URL)) {
     try {
       // Build de arguments for the transaction builder
 
@@ -195,10 +203,62 @@ export default withApiAuthRequired(async function handler(
 
       return res.status(200).json({ data, error, status })
     } catch (error) {
-      console.error('ERROR Reject: ', error)
+      console.error('EXECUTION_SIMULATION_ERROR: ', error)
+      return res.status(500).json({ error: (error as Error)?.message, status: 500 })
+    }
+  }
+
+  if (execution_type === 'execute' && WEB3SIGNER_URL) {
+    try {
+      const { transaction } = req.body as {
+        transaction: Maybe<any>
+      }
+
+      const headers = { 'Content-Type': 'application/json' }
+      const payload = {
+        jsonrpc: '2.0',
+        method: 'eth_signTransaction',
+        params: [transaction],
+        id: 1,
+      }
+      const response = await fetch(WEB3SIGNER_URL, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload),
+      })
+      const signed = await response.json()
+      if (signed.error) {
+        throw new Error('Web3Signer Error: ' + JSON.stringify(signed.error))
+      }
+      const provider = getEthersProvider(blockchain)
+      const txResponse = await provider.broadcastTransaction(signed.result)
+      await txResponse.wait()
+
+      return res.status(200).json({ data: txResponse.hash })
+    } catch (error) {
+      console.error('EXECUTION_ERROR: ', error)
       return res.status(500).json({ error: (error as Error)?.message, status: 500 })
     }
   }
 
   return res.status(500).json({ error: 'Internal Server Error', status: 500 })
 })
+
+function getEthersProvider(blockchain: BLOCKCHAIN) {
+  const { main, fallback } = {
+    Ethereum: {
+      main: process?.env?.ETHEREUM_RPC_ENDPOINT,
+      fallback: process?.env?.ETHEREUM_RPC_ENDPOINT_FALLBACK,
+    },
+    Gnosis: {
+      main: process?.env?.GNOSIS_RPC_ENDPOINT,
+      fallback: process?.env?.GNOSIS_RPC_ENDPOINT_FALLBACK,
+    },
+  }[blockchain]
+
+  const provider = new ethers.FallbackProvider([
+    { provider: new ethers.JsonRpcProvider(main), priority: 1 },
+    { provider: new ethers.JsonRpcProvider(fallback), priority: 100 },
+  ])
+  return provider
+}
