@@ -53,14 +53,17 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       !transaction ||
       !decodedTransaction ||
       transactionBuildStatus !== 'success' ||
-      transactionCheckStatus !== 'success',
+      transactionCheckStatus !== 'success' ||
+      simulationStatus == 'loading' ||
+      simulationStatus == 'not done',
     [
       selectedDAO,
       blockchain,
       transaction,
       decodedTransaction,
       transactionBuildStatus,
-      transactionCheckStatus
+      transactionCheckStatus,
+      simulationStatus
     ]
   )
 
