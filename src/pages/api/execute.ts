@@ -234,7 +234,7 @@ export default withApiAuthRequired(async function handler(
       const txResponse = await provider.broadcastTransaction(signed.result)
       await txResponse.wait()
 
-      return res.status(200).json({ data: txResponse.hash })
+      return res.status(200).json({ data: { tx_hash: txResponse.hash } })
     } catch (error) {
       console.error('EXECUTION_ERROR: ', error)
       return res.status(500).json({ error: (error as Error)?.message, status: 500 })
