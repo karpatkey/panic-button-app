@@ -5,8 +5,9 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: app
-    environment:
-      - WEB3SIGNER_URL=http://signer:9000
+    # environment:
+    #   - WEB3SIGNER_ETHEREUM_URL=http://signer-ethereum:9000
+    #   - WEB3SIGNER_GNOSIS_URL=http://signer-gnosis:9001
     env_file:
       - .env  # Specify the path to your .env file
     ports:
@@ -31,17 +32,31 @@ services:
     ports:
       - "8547:8547"
 
-  # web3signer:
+  # web3signer_ethereum:
   #   image: consensys/web3signer:develop
-  #   container_name: signer
+  #   container_name: signer-ethereum
   #   ports:
-  #     - "9000:9000"
+  #     - '9000:9000'
   #   volumes:
   #     - ./key.yaml:/home/node/signer/keyFiles/key.yaml
   #     - ./config.yaml:/home/node/signer/config.yaml
-  #   command: 
-  #     - "--config-file=/home/node/signer/config.yaml"
-  #     - "--swagger-ui-enabled=true"
-  #     - "--logging=DEBUG"
-  #     - "eth1"
-  #     - "--chain-id=100"
+  #   command:
+  #     - '--config-file=/home/node/signer/config.yaml'
+  #     - '--logging=DEBUG'
+  #     - 'eth1'
+  #     - '--chain-id=1'
+  #
+  # web3signer_gnosis:
+  #   image: consensys/web3signer:develop
+  #   container_name: signer-gnosis
+  #   ports:
+  #     - '9001:9001'
+  #   volumes:
+  #     - ./key.yaml:/home/node/signer/keyFiles/key.yaml
+  #     - ./config.yaml:/home/node/signer/config.yaml
+  #   command:
+  #     - '--config-file=/home/node/signer/config.yaml'
+  #     - '--logging=DEBUG'
+  #     - '--http-listen-port=9001'
+  #     - 'eth1'
+  #     - '--chain-id=100'
