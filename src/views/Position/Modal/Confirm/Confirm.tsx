@@ -52,6 +52,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       !blockchain ||
       !transaction ||
       !decodedTransaction ||
+      simulationStatus !== 'success' ||
       transactionBuildStatus !== 'success' ||
       transactionCheckStatus !== 'success',
     [
@@ -60,7 +61,8 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       transaction,
       decodedTransaction,
       transactionBuildStatus,
-      transactionCheckStatus
+      transactionCheckStatus,
+      simulationStatus
     ]
   )
 
