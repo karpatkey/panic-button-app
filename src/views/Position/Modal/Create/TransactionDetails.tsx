@@ -358,7 +358,7 @@ export const TransactionDetails = () => {
 
             {error && !isLoading && (
               <BoxWrapperRow sx={{ justifyContent: 'flex-start' }}>
-                <CustomTypography variant={'body2'} sx={{ color: 'red', overflow: 'auto' }}>
+                <CustomTypography variant={'body2'} sx={{ color: 'red' }}>
                   {error?.message && typeof error?.message === 'string'
                     ? error?.message
                     : 'Error decoding transaction'}
