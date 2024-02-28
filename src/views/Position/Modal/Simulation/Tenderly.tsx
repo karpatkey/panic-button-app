@@ -22,8 +22,14 @@ const WaitingSimulatingTransaction = () => {
   )
 }
 
-function translateErrorMessage(error: Error | null) {
-  if (error?.message && typeof error?.message === 'string' && error?.message != 'Failed to fetch') {
+function translateErrorMessage(error: Error | string | null) {
+  if (typeof error == 'string') {
+    return error
+  } else if (
+    error?.message &&
+    typeof error?.message === 'string' &&
+    error?.message != 'Failed to fetch'
+  ) {
     return error.message
   } else {
     return 'Error trying to simulate transaction'
@@ -41,6 +47,7 @@ export const Tenderly = () => {
   const transactionBuildStatus = state?.setup?.transactionBuild?.status ?? null
   const simulationStatus = state?.setup?.simulation?.status ?? null
   const shareUrl = state?.setup?.simulation?.value?.shareUrl ?? null
+  const simulationErrorMessage = state?.setup?.simulation?.value?.simulationErrorMessage ?? null
   const selectedDAO = state?.selectedPosition?.dao ?? null
 
   const isLoading = simulationStatus == 'loading'
@@ -83,13 +90,19 @@ export const Tenderly = () => {
         throw new Error(errorMessage)
       }
 
-      const { share_url } = data ?? {}
+      const { share_url: shareUrl, error_message: simulationErrorMessage } = data ?? {}
 
-      if (share_url) {
-        dispatch(setSetupSimulation({ shareUrl: share_url }))
-        dispatch(setSetupSimulationStatus('success' as SetupItemStatus))
+      if (shareUrl) {
+        dispatch(setSetupSimulation({ shareUrl, simulationErrorMessage }))
+        dispatch(
+          setSetupSimulationStatus(
+            !!simulationErrorMessage
+              ? ('failed' as SetupItemStatus)
+              : ('success' as SetupItemStatus)
+          )
+        )
         dispatch(setSetupStatus('simulation' as SetupStatus))
-        window.open(share_url, '_blank')
+        window.open(shareUrl, '_blank')
       } else {
         throw new Error('Error trying to simulate transaction')
       }
@@ -120,11 +133,11 @@ export const Tenderly = () => {
           <CustomTypography variant="body2">Simulation</CustomTypography>
           <StatusLabel status={simulationStatus} />
         </BoxWrapperRow>
-        <BoxWrapperRow sx={{ justifyContent: 'flex-end' }} gap="20px">
+        <BoxWrapperRow sx={{ justifyContent: 'space-between' }} gap="20px">
           {isLoading && <WaitingSimulatingTransaction />}
           {simulationStatus === ('failed' as SetupItemStatus) && !isLoading && (
-            <CustomTypography variant="body2" sx={{ color: 'red', overflow: 'auto' }}>
-              {translateErrorMessage(error)}
+            <CustomTypography variant="body2" sx={{ color: 'red', justifyContent: 'left' }}>
+              {translateErrorMessage(simulationErrorMessage || error)}
             </CustomTypography>
           )}
           {shareUrl && !isLoading && (
