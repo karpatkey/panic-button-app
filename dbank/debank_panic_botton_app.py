@@ -1,12 +1,10 @@
 import argparse
 import json
 import os
-import time
 from datetime import datetime
 
 from decouple import config
 import pandas as pd
-import requests
 import traceback
 import aiohttp
 import asyncio
@@ -16,50 +14,7 @@ def access_key():
     return config('DEBANK_API_KEY')
 
 
-DEFAULT_WALLETS = [
-    "0x0efccbb9e2c09ea29551879bd9da32362b32fc89",
-    "0x616de58c011f8736fa20c7ae5352f7f6fb9f0669",
-    "0x4F2083f5fBede34C2714aFfb3105539775f7FE64",
-    "0x458cd345b4c05e8df39d0a07220feb4ec19f5e6f",
-    "0x4971dd016127f390a3ef6b956ff944d0e2e1e462",
-    "0x849d52316331967b6ff1198e5e32a0eb168d039d",
-    "0x10e4597ff93cbee194f4879f8f1d54a370db6969",
-    "0x58e6c7ab55aa9012eacca16d1ed4c15795669e1c",
-    "0x54e191b01aa9c1f61aa5c3bce8d00956f32d3e71",
-    "0x5ff85ecf773ea3885cb4b691068ab6d7bf8bda9a",
-    "0x048a5ecc705c280b2248aeff88fd581abbeb8587",
-    "0x9298dfD8A0384da62643c2E98f437E820029E75E",
-    "0x51d34416593a8acf4127dc4a40625a8efab9940c",
-    "0x43fd1f07da06b51097a697d4e3c7d369e2e3fd60",
-    "0x3e40d73eb977dc6a537af587d48316fee66e9c8c",
-    "0xca771eda0c70aa7d053ab1b25004559b918fe662",
-    "0xce91228789b57deb45e66ca10ff648385fe7093b",
-    "0xa1cb7762f40318ee0260f53e15de835ff001cb7e",
-    "0xc498e8063c95b65d97fe9172bf952bf1c8d33330",
-    "0xa03be496e67ec29bc62f01a428683d7f9c204930",
-    "0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6",
-    "0xfe89cc7abb2c4183683ab71653c4cdc9b02d44b7",
-    "0x283af0b28c62c092c9727f1ee09c02ca627eb7f5",
-    "0x253553366da8546fc250f225fe3d25d0c782303b",
-    "0x10a19e7ee7d7f8a52822f6817de8ea18204f2e4f",
-    "0xee071f4b516f69a1603da393cde8e76c40e5be85",
-    "0xaf23dc5983230e9eeaf93280e312e57539d098d0",
-    "0x570154c8c9f8cb35dc454f1cde33dc8fe30ecd63",
-    "0x1ca861c023b09efa4932d96f1b09de906ebbc4cd",
-    "0x0DA0C3e52C977Ed3cBc641fF02DD271c3ED55aFe",
-    "0x80d63b12aecf8ae5884cbf1d3536bb0c5f612cfc",
-    "0xd3cf852898b21fc233251427c2dc93d3d604f3bb",
-    "0xf51842ebf4dc1e6f89d74ab0768c670ab04d928b",
-    "0x23b4f73fb31e89b27de17f9c5de2660cc1fb0cdf",
-    "0x464c71f6c2f760dda6093dcb91c24c39e5d6e18c",
-    "0x053d55f9b5af8694c503eb288a1b7e552f590710",
-    "0xb2289e329d2f85f1ed31adbb30ea345278f21bcf",
-    "0xe8599f3cc5d38a9ad6f3684cd5cea72f10dbc383",
-    "0x5ba7fd868c40c16f7adfae6cf87121e13fc2f7a0",
-    "0x25f2226b597e8f9514b3f68f00f494cf4f286491",
-    "0x205e795336610f5131be52f09218af19f0f3ec60",
-    "0xd784927ff2f95ba542bfc824c8a8a98f3495f6b5",
-]
+DEFAULT_WALLETS = []
 
 
 def debank_dataframe_from_pos_detail(chain, wallet, name, objeto):
@@ -139,27 +94,6 @@ def debank_dataframe_from_pos_detail(chain, wallet, name, objeto):
     return df
 
 
-def debank_protocol_api_call(wallet):
-    complex_protocol_list = f"https://pro-openapi.debank.com/v1/user/all_complex_protocol_list?id={wallet}"
-    headers = {"accept": "application/json", "AccessKey": access_key()}
-    return (complex_protocol_list, headers)
-
-    print(f"request {wallet}")
-    start_time = time.time()
-    response = requests.get(complex_protocol_list, headers=headers)
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"request {wallet} took: {elapsed_time}s")
-
-    if response.status_code == 200:
-        data = response.json()
-        return data, wallet
-    else:
-        return {f"La solicitud falló con el código de estado {response.status_code}"}
-        # print()
-        # print(response.text)
-
-
 def debank_protocol_to_df(data, wallet):
     debank_positions = pd.DataFrame()
 
@@ -170,46 +104,7 @@ def debank_protocol_to_df(data, wallet):
             debank_positions = pd.concat(
                 [debank_positions, df], ignore_index=True)
 
-    # debank_positions.to_clipboard()
-
     return debank_positions
-
-
-def debank_wallet_api_call(wallet):
-    wallet_list = f"https://pro-openapi.debank.com/v1/user/all_token_list?id={wallet}"
-
-    # Headers para la solicitud
-    headers = {"accept": "application/json", "AccessKey": access_key()}
-
-    # Realiza la solicitud GET
-    response = requests.get(wallet_list, headers=headers)
-
-    # Verifica si la solicitud fue exitosa
-    if response.status_code == 200:
-        data = response.json()
-        # Aquí puedes trabajar con los datos de la respuesta, que estarán en formato JSON
-        # print(data)
-        return data, wallet
-    else:
-        return {f"La solicitud falló con el código de estado {response.status_code}"}
-
-
-def debank_wallet_to_df(input_data):
-    wallet = input_data[1]
-    data = input_data[0]
-
-    df_wallet = pd.DataFrame(data)
-    df_wallet_w = df_wallet[df_wallet["is_wallet"]]
-    df_wallet_w = df_wallet_w[["id", "chain", "symbol", "amount", "price"]]
-    df_wallet_w = df_wallet_w[["chain", "symbol", "amount", "price"]]
-    df_wallet_w["wallet"] = wallet
-    df_wallet_w["protocol_name"] = "wallet"
-    df_wallet_w["position"] = "wallet"
-    df_wallet_w["pool_id"] = ""
-    df_wallet_w["position_type"] = "wallet"
-    df_wallet_w["token_type"] = "wallet"
-
-    return df_wallet_w
 
 
 async def async_debank_protocol_api_call(wallet, session):
@@ -245,7 +140,6 @@ def debank_fetch_all(wallets):
 
 
 def main_debank_etl(wallets=[]):
-    # start_time = time.time()
     if not wallets:
         wallets = DEFAULT_WALLETS
 
@@ -257,20 +151,11 @@ def main_debank_etl(wallets=[]):
         try:
             df1 = debank_protocol_to_df(data, wallet)
 
-            # df2 = debank_wallet_to_df(debank_wallet_api_call(wallet))
-
-            # final_df = pd.concat([df1, df2], ignore_index=True)
-
             df1["datetime"] = datetime.now()
             total_df = pd.concat([total_df, df1], ignore_index=True)
         except Exception as e:
             print(f"Error in main_debank_etl: {e}")
             return {'error en el procesamiento'}
-            # print(f"Error procesando la wallet {wallet}: {e}")
-
-    # end_time = time.time()
-    # elapsed_time = end_time - start_time
-    # print(f"La función debank_etl() tardó {elapsed_time} segundos en ejecutarse")
 
     return total_df
 
@@ -293,9 +178,6 @@ def transform_position(row):
     except Exception as e:
         print(f"Error in transform_position: {e}")
         return {f'transform_position failed on {e}'}
-
-
-# Aplicar la función a las columnas 'position', 'protocol', 'chain' y 'symbol' usando apply
 
 
 def transform_pool_id(row):
