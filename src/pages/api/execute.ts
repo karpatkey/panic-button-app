@@ -214,12 +214,13 @@ export default withApiAuthRequired(async function handler(
         transaction: Maybe<any>
       }
 
+      const id = +new Date()
       const headers = { 'Content-Type': 'application/json' }
       const payload = {
         jsonrpc: '2.0',
         method: 'eth_signTransaction',
         params: [transaction],
-        id: 1,
+        id: id,
       }
       const response = await fetch(WEB3SIGNER_URL, {
         method: 'POST',
