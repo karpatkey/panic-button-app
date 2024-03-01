@@ -96,6 +96,7 @@ export type PositionConfig = {
   label: string
   description: string
   parameters: Config[]
+  stresstest?: boolean
 }
 
 export type ExecConfig = {

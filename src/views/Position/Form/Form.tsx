@@ -136,6 +136,22 @@ const CustomForm = (props: CustomFormProps) => {
 
   const isExecuteButtonDisabled = isSubmitting || !isValid
 
+  const handleStrategyChange = React.useCallback(() => {
+    // Clear fields
+    setValue('percentage', null)
+    setValue('max_slippage', null)
+    setValue('rewards_address', null)
+    setValue('token_out_address', null)
+    setValue('bpt_address', null)
+    setKeyIndex(keyIndex + 1)
+
+    clearErrors('percentage')
+    clearErrors('max_slippage')
+    clearErrors('rewards_address')
+    clearErrors('token_out_address')
+    clearErrors('bpt_address')
+  }, [clearErrors, keyIndex, setValue])
+
   return (
     <form id="hook-form" onSubmit={handleSubmit(onSubmit)}>
       <BoxWrapperColumn gap={2}>
@@ -146,25 +162,12 @@ const CustomForm = (props: CustomFormProps) => {
               <InputRadio
                 name={'strategy'}
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                onChange={(e: any) => {
-                  // Clear fields
-                  setValue('percentage', null)
-                  setValue('max_slippage', null)
-                  setValue('rewards_address', null)
-                  setValue('token_out_address', null)
-                  setValue('bpt_address', null)
-                  setKeyIndex(keyIndex + 1)
-
-                  clearErrors('percentage')
-                  clearErrors('max_slippage')
-                  clearErrors('rewards_address')
-                  clearErrors('token_out_address')
-                  clearErrors('bpt_address')
-                }}
+                onChange={handleStrategyChange}
                 options={positionConfig.map((item: PositionConfig) => {
                   return {
                     name: item.label,
                     value: item.function_name.trim(),
+                    disabled: !item.stresstest,
                     description: item.description
                   }
                 })}
