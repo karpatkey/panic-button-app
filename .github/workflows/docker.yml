@@ -31,7 +31,7 @@ jobs:
 
       - name: Extract branch name
         id: extract_branch
-        run: echo "::set-output name=branch::${{ github.ref }}"
+        run: echo "::set-output name=branch::${{ github.ref | replace('refs/heads/', '') }}"
 
       - name: Docker meta
         id: docker_meta
