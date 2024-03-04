@@ -45,6 +45,10 @@ COPY --from=builder /app/requirements.txt ./requirements.txt
 COPY --from=builder /usr/lib/python3.10/site-packages/ /usr/lib/python3.10/site-packages/
 COPY --from=builder /app/*.js ./
 COPY --from=builder /app/*.json ./
+COPY run.sh /app/run.sh
+
+# Make the script executable
+RUN chmod +x /app/run.sh
 
 # Install Python 3.10 in the runner stage
 RUN apk --no-cache add python3
@@ -59,4 +63,4 @@ EXPOSE 3000
 RUN yarn build
 
 # Start the app
-CMD ["/app/src/run.sh"]
+CMD ["/bin/sh", "/app/run.sh"]
