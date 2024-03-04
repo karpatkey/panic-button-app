@@ -18,9 +18,9 @@ spec:
         vault.hashicorp.com/agent-inject: 'true'
         vault.hashicorp.com/agent-inject-status: 'update'
         vault.hashicorp.com/role: 'internal-app'
-        vault.hashicorp.com/agent-inject-secret-panic-button-app: 'internal/data/panic-button-app'
-        vault.hashicorp.com/agent-inject-template-panic-button-app: |
-          {{- with secret "internal/data/panic-button-app" -}}
+        vault.hashicorp.com/agent-inject-secret-develop-panic-button-app: 'internal/data/develop-panic-button-app'
+        vault.hashicorp.com/agent-inject-template-develop-panic-button-app: |
+          {{- with secret "internal/data/develop-panic-button-app" -}}
             {{- range $key, $value := .Data.data }}
               export {{ $key }}={{ $value }}
             {{- end }}
