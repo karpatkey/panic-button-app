@@ -33,7 +33,7 @@ spec:
         command:
           ['/bin/sh', '-c']
         args:
-          ['source /vault/secrets/panic-button-app && yarn dev']
+          ['source /vault/secrets/develop-panic-button-app && yarn dev']
         ports:
         - containerPort: 3000
           protocol: TCP
