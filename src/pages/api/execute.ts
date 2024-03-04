@@ -196,13 +196,24 @@ export default withApiAuthRequired(async function handler(
         break break_execute
       }
 
-      // const priv = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-      // const wallet = new ethers.Wallet(priv)
-      // const address = wallet.address
+      const provider = getEthersProvider(blockchain)
 
-      // delete transaction.chainId
-      // transaction.from = address
-      // console.log(transaction)
+      if (process.env.MODE == 'development') {
+        // Overwrite transaction so we send transactions
+        // that web3signer is configured for
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // const priv = require('yaml').parse(
+        //   // eslint-disable-next-line @typescript-eslint/no-var-requires
+        //   require('fs').readFileSync(process.cwd() + '/key.yml', 'utf8')
+        // ).privateKey
+        const priv = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+        const wallet = new ethers.Wallet(priv)
+        const address = wallet.address
+        // delete transaction.chainId
+        transaction.from = address
+        transaction.nonce = await provider.getTransactionCount(wallet.address)
+        console.log('Rewrote transaction', transaction)
+      }
 
       const id = +new Date()
       const headers = { 'Content-Type': 'application/json' }
@@ -212,23 +223,17 @@ export default withApiAuthRequired(async function handler(
         params: [transaction],
         id: id
       }
-      // console.log('payload', payload)
-      // console.log(signerUrl)
       const response = await fetch(signerUrl, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(payload)
       })
       const signed = await response.json()
-      // const t = await wallet.populateTransaction(transaction)
-      // const ethersSigned = await wallet.signTransaction(t)
-      // console.log('ethersSigned', ethersSigned)
 
       if (signed.error) {
         throw new Error('Web3Signer Error: ' + JSON.stringify(signed.error))
       }
-      // console.log('signed', signed)
-      const provider = getEthersProvider(blockchain)
+      // console.log('signed TX', signed)
       const txResponse = await provider.broadcastTransaction(signed.result)
       // await txResponse.wait()
 
@@ -268,7 +273,7 @@ export default withApiAuthRequired(async function handler(
 })
 
 function getEthersProvider(blockchain: BLOCKCHAIN) {
-  const { main, fallback } = {
+  const { mev, main, fallback } = {
     Ethereum: {
       production: {
         main: process?.env?.ETHEREUM_RPC_ENDPOINT,
@@ -285,6 +290,7 @@ function getEthersProvider(blockchain: BLOCKCHAIN) {
     },
     Gnosis: {
       production: {
+        mev: process?.env?.ETHEREUM_RPC_ENDPOINT_MEV,
         main: process?.env?.GNOSIS_RPC_ENDPOINT,
         fallback: process?.env?.GNOSIS_RPC_ENDPOINT_FALLBACK
       },
@@ -297,23 +303,22 @@ function getEthersProvider(blockchain: BLOCKCHAIN) {
         test: ''
       }
     }
-  }[blockchain][process.env.NODE_ENV]
+  }[blockchain][(process.env.MODE || 'development') as 'development' | 'production']
 
   const network = { Ethereum: 1, Gnosis: 100 }[blockchain]
-  const options = [ethers.Network.from(network), { staticNetwork: true }] as [
+  const options = [network, { staticNetwork: true }] as [
     ethers.Networkish,
     ethers.JsonRpcApiProviderOptions
   ]
-  const provider = new ethers.FallbackProvider([
-    {
-      provider: new ethers.JsonRpcProvider(main, ...options),
-      priority: 1
-    },
-    {
-      provider: new ethers.JsonRpcProvider(fallback, ...options),
-      priority: 100
-    }
-  ])
+  // console.log({ main, fallback }, options)
+  const provider = new ethers.FallbackProvider(
+    [mev, main, fallback]
+      .filter((url) => url)
+      .map((url, idx) => ({
+        priority: idx,
+        provider: new ethers.JsonRpcProvider(url, ...options)
+      }))
+  )
   return provider
 }
 
