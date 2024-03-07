@@ -1,4 +1,6 @@
-FROM node:20.0.0-alpine as node_base
+FROM node:20.10-alpine3.17 as node_base
+
+RUN apk --no-cache add libc6-compat
 
 # Shared stage with python ==================================================
 FROM node_base as node_with_python
@@ -86,16 +88,19 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=prod_builder /app/public ./public
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
+
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=prod_builder /app/roles_royce ./roles_royce
 COPY --from=prod_builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=prod_builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=deps /usr/lib/python3.10/site-packages/ /usr/lib/python3.10/site-packages/
+COPY --from=prod_builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 
