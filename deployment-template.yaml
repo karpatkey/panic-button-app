@@ -33,11 +33,11 @@ spec:
         command:
           ['/bin/sh', '-c']
         args:
-          ['source /vault/secrets/develop-panic-button-app && yarn dev']
+          ['source /vault/secrets/develop-panic-button-app && node server.js']
         ports:
         - containerPort: 3000
           protocol: TCP
-        env: 
+        env:
         - name: AUTH0_BASE_URL
           value: "{{PR_SUBDOMAIN}}"
 
@@ -49,17 +49,17 @@ spec:
 
         - name: LOCAL_FORK_PORT_ETHEREUM
           value: "8546"
-          
+
         - name: LOCAL_FORK_PORT_GNOSIS
           value: "8547"
-        
+
          # LOCAL_FORK_HOST = anvil
-      
-      
+
+
       - name: ethereum
         image: ghcr.io/foundry-rs/foundry:latest
         imagePullPolicy: Always
-        
+
         command:
           - 'anvil'
         args:
@@ -71,7 +71,7 @@ spec:
           - '8546'
           - '--host'
           - '0.0.0.0'
-        
+
         ports:
         - containerPort: 8546
           protocol: TCP
@@ -91,7 +91,7 @@ spec:
           - '8547'
           - '--host'
           - '0.0.0.0'
-        
+
         ports:
         - containerPort: 8547
           protocol: TCP
@@ -112,4 +112,3 @@ spec:
 
   selector:
     app: develop-panic-button-app-{{PR_NUMBER}}
-  

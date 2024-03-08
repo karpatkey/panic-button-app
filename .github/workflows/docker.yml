@@ -16,7 +16,6 @@ on:
 
   workflow_dispatch:
 
-
 jobs:
   docker_build:
     runs-on: self-hosted
@@ -28,12 +27,12 @@ jobs:
         run: |
           PR_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
           echo "PR_SHA=${PR_SHA}" >> $GITHUB_ENV
-      
+
       - name: Extract branch name
         shell: bash
         run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
         id: extract_branch
-      
+
       - name: Docker meta
         id: docker_meta
         uses: docker/metadata-action@v5
@@ -67,21 +66,21 @@ jobs:
     runs-on: self-hosted
     needs: docker_build
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Kubernetes
-      uses: tale/kubectl-action@v1
-      with:
-        base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+      - name: Set up Kubernetes
+        uses: tale/kubectl-action@v1
+        with:
+          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
 
-    - name: Build and Deploy
-      run: |
-        PR_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
+      - name: Build and Deploy
+        run: |
+          PR_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
 
-        ./deploy-script.sh $PR_SHA
+          ./deploy-script.sh $PR_SHA
 
-    - name: Clean up
-      run: |
-        rm deployment-temp.yaml
-        rm ingress-temp.yaml
+      - name: Clean up
+        run: |
+          rm deployment-temp.yaml
+          rm ingress-temp.yaml
