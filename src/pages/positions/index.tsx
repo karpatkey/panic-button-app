@@ -51,8 +51,6 @@ export const getServerSideProps = async (context: {
   const { req, res } = context
   const session = await getSession(req as any, res as any)
 
-  console.log('Position page')
-
   if (!session) {
     return {
       props: {

@@ -28,12 +28,12 @@ jobs:
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
-      
+
       - name: Extract branch name
         shell: bash
         run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
         id: extract_branch
-      
+
       - name: Docker meta
         id: docker_meta
         uses: docker/metadata-action@v5
@@ -77,7 +77,7 @@ jobs:
 
     - name: Build and Deploy
       run: |
-        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
 
         ./deploy-script.sh $SHORT_SHA
 
