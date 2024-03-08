@@ -4,6 +4,12 @@ FROM node:20.0.0-alpine as builder
 # Set working directory in the builder stage
 WORKDIR /app
 
+# Copy package.json and yarn.lock for Yarn installation
+COPY package.json yarn.lock ./
+
+# Install Node.js dependencies in the builder stage
+RUN yarn install
+
 # Copy the rest of the app files into the builder stage
 COPY . .
 
@@ -22,9 +28,6 @@ RUN apk --no-cache add \
     pip3 install -r requirements.txt && \
     apk del python3-dev musl-dev gcc g++
 
-# Install Node.js dependencies in the builder stage
-RUN yarn install
-
 # Runner stage
 FROM node:20.0.0-alpine
 
@@ -42,6 +45,10 @@ COPY --from=builder /app/requirements.txt ./requirements.txt
 COPY --from=builder /usr/lib/python3.10/site-packages/ /usr/lib/python3.10/site-packages/
 COPY --from=builder /app/*.js ./
 COPY --from=builder /app/*.json ./
+COPY run.sh /app/run.sh
+
+# Make the script executable
+RUN chmod +x /app/run.sh
 
 # Install Python 3.10 in the runner stage
 RUN apk --no-cache add python3
@@ -56,4 +63,4 @@ EXPOSE 3000
 RUN yarn build
 
 # Start the app
-CMD ["yarn", "start"]
+CMD ["/bin/sh", "/app/run.sh"]
