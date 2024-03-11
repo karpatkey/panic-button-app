@@ -7,10 +7,11 @@ import CustomTypography from 'src/components/CustomTypography'
 import InfoIcon from '@mui/icons-material/Info'
 import { InputProps } from 'src/views/Position/Form/Types'
 
-export interface Option {
+export type Option = {
   name: string
   value: string
   description?: string
+  disabled?: boolean
 }
 
 export interface InputWithOptionsProps extends InputProps {
@@ -25,10 +26,15 @@ const InputRadio: React.FC<InputWithOptionsProps> = ({
   onChange: onChangeRadio
 }: InputWithOptionsProps) => {
   const generateRadioOptions = () =>
-    options.map((option: any, index: number) => {
+    options.map((option: Option, index: number) => {
       return (
         <BoxWrapperRow sx={{ justifyContent: 'flex-start' }} key={index}>
-          <FormControlLabel value={option.value} label={option.name} control={<Radio />} />
+          <FormControlLabel
+            value={option.value}
+            label={option.name}
+            control={<Radio />}
+            disabled={option.disabled}
+          />
           {option?.description ? (
             <Tooltip
               title={

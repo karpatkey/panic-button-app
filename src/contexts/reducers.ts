@@ -34,12 +34,18 @@ import {
   SetSetupTransactionCheck,
   SetSetupTransactionCheckStatus,
   UpdateEnvNetworkData,
+  Filter,
   UpdateStatus,
-  Filter
+  AddDaosConfigs
 } from './actions'
 
 export const mainReducer = (state: InitialState, action: Actions): InitialState => {
   switch (action.type) {
+    case ActionType.AddDaosConfigs:
+      return {
+        ...state,
+        daosConfigs: action.payload
+      }
     case ActionType.UpdateStatus:
       return {
         ...state,
@@ -321,6 +327,11 @@ export const addPositions = (positions: Position[]): AddPositions => ({
 
 export const clearPositions = (): ClearPositions => ({
   type: ActionType.ClearPositions
+})
+
+export const addDaosConfigs = (configs: any[]): AddDaosConfigs => ({
+  type: ActionType.AddDaosConfigs,
+  payload: configs
 })
 
 export const setSelectedPosition = (position: Position): SetSelectedPosition => ({

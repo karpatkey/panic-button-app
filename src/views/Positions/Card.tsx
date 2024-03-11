@@ -5,9 +5,7 @@ import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import * as React from 'react'
 import Link from 'next/link'
-import { BLOCKCHAIN, DAO, EXECUTION_TYPE, getDAOFilePath } from 'src/config/strategies/manager'
 import { Position } from 'src/contexts/state'
-import { getStrategy } from 'src/utils/strategies'
 
 interface PositionProps {
   id: number
@@ -21,17 +19,9 @@ const Card = (props: PositionProps) => {
     protocol,
     blockchain,
     lptoken_name: positionName,
-    dao
+    dao,
+    isActive
   } = position
-
-  const existDAOFilePath = !!getDAOFilePath(
-    position.dao as DAO,
-    blockchain as BLOCKCHAIN,
-    'execute' as EXECUTION_TYPE
-  )
-
-  const { positionConfig } = getStrategy(position as Position)
-  const areAnyStrategies = positionConfig?.length > 0
 
   const CardWrapper = () => {
     return (
@@ -42,8 +32,8 @@ const Card = (props: PositionProps) => {
           width: '100%',
           height: '100%',
           justifyContent: 'space-between',
-          ...(areAnyStrategies && existDAOFilePath ? { cursor: 'pointer' } : {}),
-          ...(!areAnyStrategies || !existDAOFilePath ? { opacity: '0.2 !important' } : {})
+          ...(isActive ? { cursor: 'pointer' } : {}),
+          ...(!isActive ? { opacity: '0.2 !important' } : {})
         }}
       >
         <BoxWrapperRow sx={{ justifyContent: 'space-between' }}>
@@ -63,7 +53,7 @@ const Card = (props: PositionProps) => {
     )
   }
 
-  return areAnyStrategies ? (
+  return isActive ? (
     <Link href={`/positions/${positionId}`} style={{ textDecoration: 'none' }}>
       <CardWrapper />
     </Link>

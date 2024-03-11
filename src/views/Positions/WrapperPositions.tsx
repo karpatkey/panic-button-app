@@ -15,7 +15,6 @@ import { DAOFilter } from 'src/components/DAOFilter'
 import { filter, setSearch } from 'src/contexts/reducers'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import { Position, Status } from 'src/contexts/state'
-import { BLOCKCHAIN, DAO, EXECUTION_TYPE, getDAOFilePath } from 'src/config/strategies/manager'
 import { getStrategy } from 'src/utils/strategies'
 
 interface SearchPositionProps {
@@ -53,28 +52,26 @@ const WrapperPositions = () => {
     [dispatch]
   )
 
-  const filteredPositionsActive = filteredPositions
-    .map((position: Position) => {
-      const existDAOFilePath = !!getDAOFilePath(
-        position.dao as DAO,
-        position.blockchain as BLOCKCHAIN,
-        'execute' as EXECUTION_TYPE
-      )
-      const { positionConfig } = getStrategy(position as Position)
-      const areAnyStrategies = positionConfig?.length > 0
-      const isActive = areAnyStrategies && existDAOFilePath
-      return {
-        ...position,
-        isActive
-      }
-    })
-    .sort((a: Position, b: Position) => {
-      if (a.isActive && !b.isActive) return -1
-      if (!a.isActive && b.isActive) return 1
-      if (a.lptoken_name < b.lptoken_name) return -1
-      if (a.lptoken_name > b.lptoken_name) return 1
-      return 0
-    })
+  const filteredPositionsActive = React.useMemo(
+    () =>
+      filteredPositions
+        .map((position: Position) => {
+          const { positionConfig } = getStrategy(state.daosConfigs, position as Position)
+          const isActive = !!positionConfig.find((p) => p.stresstest)
+          return {
+            ...position,
+            isActive
+          }
+        })
+        .sort((a: Position, b: Position) => {
+          if (a.isActive && !b.isActive) return -1
+          if (!a.isActive && b.isActive) return 1
+          if (a.lptoken_name < b.lptoken_name) return -1
+          if (a.lptoken_name > b.lptoken_name) return 1
+          return 0
+        }),
+    [filteredPositions, state.daosConfigs]
+  )
 
   return (
     <ErrorBoundaryWrapper>

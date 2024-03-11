@@ -7,16 +7,25 @@ import { DataWarehouse } from 'src/services/classes/dataWarehouse.class'
 import { withPageAuthRequired } from '@auth0/nextjs-auth0/client'
 import { getSession, Session } from '@auth0/nextjs-auth0'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { updateStatus, addPositions, addDAOs, clearSearch, filter } from 'src/contexts/reducers'
+import {
+  updateStatus,
+  addPositions,
+  addDAOs,
+  clearSearch,
+  filter,
+  addDaosConfigs
+} from 'src/contexts/reducers'
 import { Position, Status } from 'src/contexts/state'
+import { getDaosConfigs } from 'src/utils/jsonsFetcher'
 
 interface PositionsPageProps {
   positions: Position[]
   DAOs: string[]
+  daosConfigs: any
 }
 
 const PositionsPage = (props: PositionsPageProps) => {
-  const { positions = [], DAOs } = props
+  const { positions = [], DAOs, daosConfigs = [] } = props
 
   const { dispatch } = useApp()
 
@@ -26,14 +35,17 @@ const PositionsPage = (props: PositionsPageProps) => {
 
       dispatch(addDAOs(DAOs))
       dispatch(addPositions(positions))
+      dispatch(addDaosConfigs(daosConfigs))
       dispatch(clearSearch())
       dispatch(filter())
+
+      dispatch(updateStatus('Finished' as Status))
 
       dispatch(updateStatus('Finished' as Status))
     }
 
     start()
-  }, [dispatch, DAOs, positions])
+  }, [dispatch, DAOs, positions, daosConfigs])
 
   return <WrapperPositions />
 }
@@ -68,6 +80,7 @@ export const getServerSideProps = async (context: {
 
   const dataWarehouse = DataWarehouse.getInstance()
   const positions: Position[] = await dataWarehouse.getPositions(DAOs)
+  const daosConfigs = await getDaosConfigs(DAOs)
 
-  return { props: { positions, DAOs } }
+  return { props: { positions, DAOs, daosConfigs } }
 }

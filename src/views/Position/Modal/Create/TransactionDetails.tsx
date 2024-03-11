@@ -140,7 +140,7 @@ export const TransactionDetails = () => {
 
         const body = await response.json()
 
-        const { status } = body
+        const { status, error: executeError } = body
 
         const { transaction, decoded_transaction: decodedTransaction } = body?.data ?? {}
 
@@ -160,7 +160,7 @@ export const TransactionDetails = () => {
           dispatch(setSetupStatus('transaction_check' as SetupStatus))
         }
 
-        if (status === 500) {
+        if (status === 500 || response?.status === 401) {
           // Don't allow to simulate or execute transaction
           const errorMessage =
             typeof body?.error === 'string' ? body?.error : 'Error decoding transaction'
@@ -174,14 +174,21 @@ export const TransactionDetails = () => {
         }
 
         if (status === 200) {
-          // Allow to simulate and execute transaction
-          dispatch(setSetupTransactionCheck(true))
-          dispatch(setSetupTransactionCheckStatus('success' as SetupItemStatus))
-          dispatch(
-            setSetupTransactionBuild({ transaction, decodedTransaction } as TransactionBuild)
-          )
-          dispatch(setSetupTransactionBuildStatus('success' as SetupItemStatus))
-          dispatch(setSetupStatus('transaction_check' as SetupStatus))
+          if (executeError) {
+            setError(new Error(executeError))
+            dispatch(setSetupTransactionCheck(false))
+            dispatch(setSetupTransactionCheckStatus('failed' as SetupItemStatus))
+            dispatch(setSetupTransactionBuildStatus('failed' as SetupItemStatus))
+          } else {
+            // Allow to simulate and execute transaction
+            dispatch(setSetupTransactionCheck(true))
+            dispatch(setSetupTransactionCheckStatus('success' as SetupItemStatus))
+            dispatch(
+              setSetupTransactionBuild({ transaction, decodedTransaction } as TransactionBuild)
+            )
+            dispatch(setSetupTransactionBuildStatus('success' as SetupItemStatus))
+            dispatch(setSetupStatus('transaction_check' as SetupStatus))
+          }
         }
       } catch (error) {
         console.error('Error fetching data:', error)

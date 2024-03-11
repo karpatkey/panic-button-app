@@ -55,6 +55,7 @@ export const initialState: InitialState = {
   status: Status.Loading,
   positions: [],
   filteredPositions: [],
+  daosConfigs: [],
   selectedPosition: null,
   search: null,
   DAOs: [],
@@ -89,6 +90,7 @@ export type InitialState = {
   status: Status
   positions: Position[]
   filteredPositions: Position[]
+  daosConfigs: any[]
   selectedPosition: Maybe<Position>
   search: Maybe<string>
   DAOs: string[]

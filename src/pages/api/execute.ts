@@ -9,6 +9,7 @@ import {
 } from 'src/config/strategies/manager'
 import { EXECUTION_TYPE } from 'src/config/strategies/manager'
 import { CommonExecutePromise } from 'src/utils/execute'
+import { getDaosConfigs } from 'src/utils/jsonsFetcher'
 
 type Status = {
   data?: Maybe<any>
@@ -81,13 +82,9 @@ export default withApiAuthRequired(async function handler(
     parameters.push(`${blockchain.toUpperCase()}`)
   }
 
-  const filePath = getDAOFilePath(
-    dao as DAO,
-    blockchain as BLOCKCHAIN,
-    execution_type as EXECUTION_TYPE
-  )
+  const daosConfigs = await getDaosConfigs([dao || ''])
 
-  console.log('FilePath', filePath)
+  const filePath = getDAOFilePath(execution_type as EXECUTION_TYPE)
 
   if (execution_type === 'transaction_builder') {
     try {
@@ -128,6 +125,7 @@ export default withApiAuthRequired(async function handler(
       // Add CONSTANTS from the strategy
       if (protocol) {
         const { positionConfig } = getStrategyByPositionId(
+          daosConfigs,
           dao as DAO,
           blockchain as unknown as BLOCKCHAIN,
           protocol,

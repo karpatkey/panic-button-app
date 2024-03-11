@@ -1,19 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import GnosisDao_ethereum from '../../../roles_royce/roles_royce/applications/panic_button_app/config/strategies/GnosisDAO-ethereum.json'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import GnosisDao_gnosis from '../../../roles_royce/roles_royce/applications/panic_button_app/config/strategies/GnosisDAO-gnosis.json'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import GnosisLtd_ethereum from '../../../roles_royce/roles_royce/applications/panic_button_app/config/strategies/GnosisLtd-ethereum.json'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import GnosisLtd_gnosis from '../../../roles_royce/roles_royce/applications/panic_button_app/config/strategies/GnosisLtd-gnosis.json'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import karpatkeyDAO_ethereum from '../../../roles_royce/roles_royce/applications/panic_button_app/config/strategies/karpatkey-ethereum.json'
-
 export type DAO =
   | 'Gnosis DAO'
   | 'Balancer DAO'
@@ -30,58 +14,12 @@ export type DAO_MAPPER_TYPE = {
   name: DAO
   blockchain: BLOCKCHAIN
   config: any
-  executeFilePath?: string
-  simulateFilePath?: string
-  transactionBuilderFilePath?: string
 }
 
-export const DAO_MAPPER: DAO_MAPPER_TYPE[] = [
-  {
-    name: 'Gnosis DAO',
-    blockchain: 'Ethereum',
-    config: GnosisDao_ethereum,
-    executeFilePath: 'roles_royce/roles_royce/applications/panic_button_app/execute.py',
-    simulateFilePath: 'roles_royce/roles_royce/applications/panic_button_app/simulate.py',
-    transactionBuilderFilePath:
-      'roles_royce/roles_royce/applications/panic_button_app/transaction_builder.py'
-  },
-  {
-    name: 'Gnosis Ltd',
-    blockchain: 'Ethereum',
-    config: GnosisLtd_ethereum,
-    executeFilePath: 'roles_royce/roles_royce/applications/panic_button_app/execute.py',
-    simulateFilePath: 'roles_royce/roles_royce/applications/panic_button_app/simulate.py',
-    transactionBuilderFilePath:
-      'roles_royce/roles_royce/applications/panic_button_app/transaction_builder.py'
-  },
-  {
-    name: 'Gnosis DAO',
-    blockchain: 'Gnosis',
-    config: GnosisDao_gnosis,
-    executeFilePath: 'roles_royce/roles_royce/applications/panic_button_app/execute.py',
-    simulateFilePath: 'roles_royce/roles_royce/applications/panic_button_app/simulate.py',
-    transactionBuilderFilePath:
-      'roles_royce/roles_royce/applications/panic_button_app/transaction_builder.py'
-  },
-  {
-    name: 'Gnosis Ltd',
-    blockchain: 'Gnosis',
-    config: GnosisLtd_gnosis,
-    executeFilePath: 'roles_royce/roles_royce/applications/panic_button_app/execute.py',
-    simulateFilePath: 'roles_royce/roles_royce/applications/panic_button_app/simulate.py',
-    transactionBuilderFilePath:
-      'roles_royce/roles_royce/applications/panic_button_app/transaction_builder.py'
-  },
-  {
-    name: 'karpatkey DAO',
-    blockchain: 'Ethereum',
-    config: karpatkeyDAO_ethereum,
-    executeFilePath: 'roles_royce/roles_royce/applications/panic_button_app/execute.py',
-    simulateFilePath: 'roles_royce/roles_royce/applications/panic_button_app/simulate.py',
-    transactionBuilderFilePath:
-      'roles_royce/roles_royce/applications/panic_button_app/transaction_builder.py'
-  }
-]
+const EXECUTE_FILE_PATH = 'roles_royce/roles_royce/applications/panic_button_app/execute.py'
+const SIMULATE_FILE_PATH = 'roles_royce/roles_royce/applications/panic_button_app/simulate.py'
+const TRANSACTION_BUILDER_FILE_PATH =
+  'roles_royce/roles_royce/applications/panic_button_app/transaction_builder.py'
 
 export enum DEFAULT_VALUES_KEYS {
   position_id = 'position_id',
@@ -158,6 +96,7 @@ export type PositionConfig = {
   label: string
   description: string
   parameters: Config[]
+  stresstest?: boolean
 }
 
 export type ExecConfig = {
@@ -165,46 +104,40 @@ export type ExecConfig = {
   positionConfig: PositionConfig[]
 }
 
-export const getStrategies = (dao: DAO, blockchain: BLOCKCHAIN) => {
-  const DAO_ITEM: DAO_MAPPER_TYPE | undefined = DAO_MAPPER.find(
-    (daoMapper) => daoMapper.name === dao && daoMapper.blockchain === blockchain
-  )
-  return DAO_ITEM
+export const getStrategies = (mapper: any, dao: DAO, blockchain: BLOCKCHAIN) => {
+  const bc = blockchain.toLowerCase()
+  return mapper?.find((daoMapper: any) => daoMapper.dao === dao && daoMapper.blockchain === bc)
 }
 
 export const getStrategyByPositionId = (
+  daosConfigs: any,
   dao: DAO,
   blockchain: BLOCKCHAIN,
-  protocol: string,
+  _protocol: string,
   positionId: string
 ) => {
-  const DAO_ITEM: DAO_MAPPER_TYPE | undefined = getStrategies(dao, blockchain)
+  const daoItem = getStrategies(daosConfigs, dao, blockchain)
 
   const positionKey = `${positionId}`
 
-  const position = DAO_ITEM?.config?.positions?.find(
+  const position = daoItem?.positions?.find(
     (position: any) => position.position_id.toLowerCase() === positionKey.toLowerCase()
   )
 
   return {
-    commonConfig: DAO_ITEM?.config?.general_parameters ?? [],
+    commonConfig: daoItem?.general_parameters ?? [],
     positionConfig: position?.exec_config ?? []
   } as ExecConfig
 }
 
-export const getDAOFilePath = (dao: DAO, blockchain: BLOCKCHAIN, executionType: EXECUTION_TYPE) => {
-  const DAO_ITEM: DAO_MAPPER_TYPE | undefined = getStrategies(dao, blockchain)
-  let filePath = ''
+export const getDAOFilePath = (executionType: EXECUTION_TYPE) => {
+  // const DAO_ITEM: DAO_MAPPER_TYPE | undefined = getStrategies(dao, blockchain)
   switch (executionType) {
     case 'execute':
-      filePath = DAO_ITEM?.executeFilePath ?? ''
-      break
+      return EXECUTE_FILE_PATH
     case 'simulate':
-      filePath = DAO_ITEM?.simulateFilePath ?? ''
-      break
+      return SIMULATE_FILE_PATH
     case 'transaction_builder':
-      filePath = DAO_ITEM?.transactionBuilderFilePath ?? ''
-      break
+      return TRANSACTION_BUILDER_FILE_PATH
   }
-  return filePath
 }
