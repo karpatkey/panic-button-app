@@ -6,8 +6,6 @@ import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import * as React from 'react'
 import Link from 'next/link'
 import { Position } from 'src/contexts/state'
-import { getStrategy } from 'src/utils/strategies'
-import { useApp } from 'src/contexts/app.context'
 
 interface PositionProps {
   id: number
@@ -21,13 +19,9 @@ const Card = (props: PositionProps) => {
     protocol,
     blockchain,
     lptoken_name: positionName,
-    dao
+    dao,
+    isActive
   } = position
-
-  const { state } = useApp()
-
-  const { positionConfig } = getStrategy(state.daosConfigs, position as Position)
-  const areAnyStrategies = positionConfig?.length > 0
 
   const CardWrapper = () => {
     return (
@@ -38,8 +32,8 @@ const Card = (props: PositionProps) => {
           width: '100%',
           height: '100%',
           justifyContent: 'space-between',
-          ...(areAnyStrategies ? { cursor: 'pointer' } : {}),
-          ...(!areAnyStrategies ? { opacity: '0.2 !important' } : {})
+          ...(isActive ? { cursor: 'pointer' } : {}),
+          ...(!isActive ? { opacity: '0.2 !important' } : {})
         }}
       >
         <BoxWrapperRow sx={{ justifyContent: 'space-between' }}>
@@ -59,7 +53,7 @@ const Card = (props: PositionProps) => {
     )
   }
 
-  return areAnyStrategies ? (
+  return isActive ? (
     <Link href={`/positions/${positionId}`} style={{ textDecoration: 'none' }}>
       <CardWrapper />
     </Link>
