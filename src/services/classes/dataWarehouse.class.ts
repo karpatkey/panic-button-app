@@ -37,24 +37,27 @@ export class DataWarehouse {
 
     let viewQuery = `SELECT * FROM  \`karpatkey-data-warehouse.${table}\``
 
+    let params = {}
     if (DAOs && DAOs.length > 0) {
-      viewQuery += ` WHERE dao IN UNNEST(${JSON.stringify(DAOs)})`
+      viewQuery += ` WHERE dao IN UNNEST(@daos)`
+      params = { daos: DAOs }
     }
 
-    return this.executeCommonJobQuery(viewQuery)
+    return this.executeCommonJobQuery(viewQuery, params)
   }
 
   async getPositionById(id: string) {
     const table =
       REPORTS_DATASET[DATA_WAREHOUSE_ENV as unknown as DataWarehouseEnvironment]['getPositions']
-    const viewQuery = `SELECT * FROM  \`karpatkey-data-warehouse.${table}\` where position_id = '${id}'`
+    const viewQuery = `SELECT * FROM  \`karpatkey-data-warehouse.${table}\` where position_id = @id`
 
-    return this.executeCommonJobQuery(viewQuery)
+    return this.executeCommonJobQuery(viewQuery, { id })
   }
 
-  private async executeCommonJobQuery(viewQuery: string) {
+  private async executeCommonJobQuery(viewQuery: string, params = {}) {
     const options = {
       query: viewQuery,
+      params,
       // Location must match that of the dataset(s) referenced in the query.
       location: 'US'
     }
