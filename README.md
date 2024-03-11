@@ -1,4 +1,5 @@
 # The Panic Button App
+TEST
 
 This app enables karpatkey’s asset managers to safely and rapidly deploy, adjust or exit any position with carefully tailored and predesigned strategies.
 
