@@ -26,8 +26,8 @@ jobs:
 
       - name: Set SHORT_SHA as Environment Variable
         run: |
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
+          PR_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
+          echo "PR_SHA=${PR_SHA}" >> $GITHUB_ENV
       
       - name: Extract branch name
         shell: bash
@@ -40,7 +40,7 @@ jobs:
         with:
           images: registry.digitalocean.com/karpatkey/panic-button-app
           tags: |
-            type=raw,value=pr${{ env.SHORT_SHA }}
+            type=raw,value=pr${{ env.PR_SHA }}
             ${{ steps.extract_branch.outputs.branch }}
 
       - name: Login to Docker
@@ -77,9 +77,9 @@ jobs:
 
     - name: Build and Deploy
       run: |
-        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        PR_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
 
-        ./deploy-script.sh $SHORT_SHA
+        ./deploy-script.sh $PR_SHA
 
     - name: Clean up
       run: |
