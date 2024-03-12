@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # GitHub repository and PR API endpoint
-GITHUB_REPO="karpatkey/pani-button-app"
+GITHUB_REPO="karpatkey/panic-button-app"
 GITHUB_SHA=$1
 GITHUB_API_URL="https://api.github.com/repos/${GITHUB_REPO}/commits/${GITHUB_SHA}/pulls"
 
