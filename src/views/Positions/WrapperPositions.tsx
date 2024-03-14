@@ -1,7 +1,7 @@
 import { SearchOutlined } from '@mui/icons-material'
 import { IconButton, TextField } from '@mui/material'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { DAOFilter } from 'src/components/DAOFilter'
 import ErrorBoundaryWrapper from 'src/components/ErrorBoundary/ErrorBoundaryWrapper'
 import { FOOTER_HEIGHT } from 'src/components/Layout/Footer'
@@ -16,16 +16,18 @@ import List from 'src/views/Positions/List'
 
 interface SearchPositionProps {
   onChange: (value: string) => void
+  value: string
 }
 
-const SearchPosition = (props: SearchPositionProps) => {
+const Search = (props: SearchPositionProps) => {
   return (
     <TextField
       size="small"
-      sx={{ width: '600px' }}
+      sx={{ width: '600px', maxWidth: '80vw' }}
       variant="outlined"
       onChange={(e) => props.onChange(e.target.value)}
       placeholder="Search position"
+      defaultValue={props.value}
       InputProps={{
         endAdornment: (
           <IconButton>
@@ -37,6 +39,10 @@ const SearchPosition = (props: SearchPositionProps) => {
   )
 }
 
+const SearchPosition = React.memo(Search)
+
+import { useDebounceCallback } from 'usehooks-ts'
+
 const WrapperPositions = () => {
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -44,18 +50,27 @@ const WrapperPositions = () => {
   const positions = usePositions()
   const { isFetched } = positions
 
-  const handleSearch = (term: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    if (term) {
-      params.set('query', term)
-    } else {
-      params.delete('query')
-    }
+  const query = searchParams.get('query') || ''
 
-    const p = params.toString()
-    const uri = p ? `${pathname}?${p}` : pathname
+  const updateUrl = useDebounceCallback((uri) => {
     router.push(uri)
-  }
+  }, 800)
+
+  const handleSearch = useCallback(
+    (term: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (term) {
+        params.set('query', term)
+      } else {
+        params.delete('query')
+      }
+
+      const p = params.toString()
+      const uri = p ? `${pathname}?${p}` : pathname
+      updateUrl(uri)
+    },
+    [pathname, searchParams, updateUrl],
+  )
 
   return (
     <ErrorBoundaryWrapper>
@@ -69,7 +84,7 @@ const WrapperPositions = () => {
             </BoxWrapperRow>
             <PaperSection title="Positions">
               <BoxWrapperRow gap={2} sx={{ justifyContent: 'space-between' }}>
-                <SearchPosition onChange={handleSearch} />
+                <SearchPosition value={query} onChange={handleSearch} />
               </BoxWrapperRow>
               <List />
             </PaperSection>

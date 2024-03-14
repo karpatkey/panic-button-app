@@ -15,7 +15,7 @@ export const DAOFilter = () => {
     (_e: React.MouseEvent<HTMLElement>, value: any) => {
       const term = value
       const params = new URLSearchParams(searchParams.toString())
-      if (term) {
+      if (term && term != 'All') {
         params.set('dao', term)
       } else {
         params.delete('dao')
