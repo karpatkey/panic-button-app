@@ -37,6 +37,7 @@ const PositionDoesntExist = () => {
   )
 }
 
+import Loading from 'src/components/Loading'
 import { usePosition } from 'src/queries/positions'
 
 const PositionIndex = (props: PositionIndexProps): ReactElement => {
@@ -44,12 +45,16 @@ const PositionIndex = (props: PositionIndexProps): ReactElement => {
 
   const { dispatch } = useApp()
 
-  const { data: position } = usePosition(dao, chain, pool_id)
+  const { data: position, isPending } = usePosition(dao, chain, pool_id)
 
   React.useEffect(() => {
     dispatch(addDaosConfigs(daosConfigs))
     dispatch(updateEnvNetworkData(ENV_NETWORK_DATA))
   }, [dispatch, daosConfigs, ENV_NETWORK_DATA])
+
+  if (isPending) {
+    return <Loading fullPage />
+  }
 
   return (
     <>
