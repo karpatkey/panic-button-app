@@ -5,12 +5,12 @@ import NoSsr from '@mui/material/NoSsr'
 import { ThemeProvider } from '@mui/material/styles'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
-import * as React from 'react'
 import Layout from 'src/components/Layout/Layout'
 import { TITLE } from 'src/config/constants'
 import createEmotionCache from 'src/config/createEmotionCache'
 import theme from 'src/config/theme'
 import { AppProvider } from 'src/contexts/app.context'
+import QueryClientProvider from 'src/queries/provider'
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
@@ -19,24 +19,8 @@ interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
 export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
-
-  const [queryClient] = React.useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            // With SSR, we usually want to set some default staleTime
-            // above 0 to avoid refetching immediately on the client
-            staleTime: 60 * 1000,
-            gcTime: 5 * 60 * 1000, // 5 minutes
-          },
-        },
-      }),
-  )
 
   return (
     <UserProvider>
@@ -49,7 +33,7 @@ export default function MyApp(props: MyAppProps) {
           {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
           <AppProvider>
             <NoSsr>
-              <QueryClientProvider client={queryClient}>
+              <QueryClientProvider>
                 <CssBaseline />
                 <Layout>
                   <Component {...pageProps} />

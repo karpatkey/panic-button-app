@@ -12,7 +12,7 @@ const List = () => {
   const {
     state: { daosConfigs },
   } = useApp()
-  const { data: positions, isPending } = usePositions()
+  const { data: positions } = usePositions()
 
   const searchParams = useSearchParams()
 
@@ -66,7 +66,7 @@ const List = () => {
     }
   }, [positionsWithStrategies, searchParams])
 
-  if (isPending) {
+  if (!positionsWithStrategies) {
     return <EmptyData />
   }
 
