@@ -1,4 +1,6 @@
-import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import {
   AccordionSummary,
   Alert,
@@ -8,63 +10,59 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableRow
+  TableRow,
 } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import CustomTypography from 'src/components/CustomTypography'
 import AccordionDetails from '@mui/material/AccordionDetails'
-import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
-import { formatPercentage } from 'src/utils/format'
-import * as React from 'react'
 import { AccordionWrapper } from 'src/components/Accordion/AccordionWrapper'
+import CustomTypography from 'src/components/CustomTypography'
+import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
+import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import { useApp } from 'src/contexts/app.context'
-import { shortenAddress } from 'src/utils/string'
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { Strategy } from 'src/contexts/state'
+import { formatPercentage } from 'src/utils/format'
+import { shortenAddress } from 'src/utils/string'
 
 const LABEL_MAPPER = {
   description: {
     label: 'Strategy',
-    order: 4
+    order: 4,
   },
   blockchain: {
     label: 'Blockchain',
-    order: 1
+    order: 1,
   },
   protocol: {
     label: 'Protocol',
-    order: 2
+    order: 2,
   },
   position_name: {
     label: 'Position name',
-    order: 3
+    order: 3,
   },
   bpt_address: {
     label: 'BPT Address',
-    order: 5
+    order: 5,
   },
   percentage: {
     label: 'Percentage',
-    order: 6
+    order: 6,
   },
   max_slippage: {
     label: 'Max slippage',
-    order: 7
+    order: 7,
   },
   rewards_address: {
     label: 'Rewards address',
-    order: 8
+    order: 8,
   },
   token_out_address: {
     label: 'Token out address',
-    order: 9
-  }
+    order: 9,
+  },
 }
 
 export const SetupDetails = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { dispatch, state } = useApp()
+  const { state } = useApp()
 
   const createValue = state?.setup?.create?.value || {}
 
@@ -82,7 +80,7 @@ export const SetupDetails = () => {
           return {
             key,
             label: LABEL_MAPPER[key as keyof typeof LABEL_MAPPER].label,
-            value: createValue && createValue[key as keyof typeof createValue]
+            value: createValue && createValue[key as keyof typeof createValue],
           }
         })
         .filter(({ value }) => value)
@@ -129,7 +127,7 @@ export const SetupDetails = () => {
                                   width: '1rem',
                                   height: '1rem',
                                   color: 'black',
-                                  ':hover': { color: 'grey', transition: '0.2s' }
+                                  ':hover': { color: 'grey', transition: '0.2s' },
                                 }}
                               />
                             </IconButton>
@@ -150,7 +148,7 @@ export const SetupDetails = () => {
                                   cursor: 'pointer',
                                   width: '1rem',
                                   height: '1rem',
-                                  color: 'black'
+                                  color: 'black',
                                 }}
                               />
                             </IconButton>

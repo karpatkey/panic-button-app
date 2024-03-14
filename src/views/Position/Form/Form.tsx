@@ -5,7 +5,6 @@ import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 
 import InfoIcon from '@mui/icons-material/Info'
 import Tooltip from '@mui/material/Tooltip'
-import { useRouter } from 'next/navigation'
 import CustomTypography from 'src/components/CustomTypography'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import {
@@ -27,22 +26,20 @@ import { Title } from './Title'
 
 interface CustomFormProps {
   handleClickOpen: () => void
-  position: any
+  position: Position
 }
 
 const CustomForm = (props: CustomFormProps) => {
   const { handleClickOpen, position } = props
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { dispatch, state } = useApp()
   const [keyIndex, setKeyIndex] = React.useState(1)
 
-  const { positionConfig, commonConfig } = getStrategy(state.daosConfigs, position as Position)
+  const { positionConfig, commonConfig } = getStrategy(state.daosConfigs, position)
 
   // If we don't do this, the application will rerender every time
   const defaultValues: DEFAULT_VALUES_TYPE = React.useMemo(() => {
     return {
-      position_id: position?.position_id ?? null,
       blockchain: position?.blockchain ?? null,
       protocol: position?.protocol ?? null,
       strategy: positionConfig[0]?.function_name?.trim(),
@@ -74,9 +71,6 @@ const CustomForm = (props: CustomFormProps) => {
   // We need to do this, because the react hook form default values are not working properly
   React.useEffect(() => {
     if (defaultValues) {
-      setValue('position_id', position?.position_id ?? null)
-      setValue('blockchain', position?.blockchain ?? null)
-      setValue('protocol', position?.protocol ?? null)
       setValue('strategy', positionConfig[0]?.function_name ?? null)
       setValue('percentage', null)
       setValue('rewards_address', null)
@@ -84,8 +78,7 @@ const CustomForm = (props: CustomFormProps) => {
       setValue('token_out_address', null)
       setValue('bpt_address', null)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValues])
+  }, [defaultValues, positionConfig, setValue])
 
   const onSubmit: SubmitHandler<any> = React.useCallback(
     async (data: any) => {
@@ -94,25 +87,23 @@ const CustomForm = (props: CustomFormProps) => {
       // First clear the stage just in case
       dispatch(clearSetup())
 
-      // Object is possibly 'undefined'.  TS2532, disable this error
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const tokenOutAddressLabel =
         positionConfig
           ?.find((item: PositionConfig) => item?.function_name === data?.strategy)
           ?.parameters?.find((item: Config) => item?.name === 'token_out_address')
           ?.options?.find((item: any) => item?.value === data?.token_out_address)?.label ?? ''
 
-      const setup = {
+      const setup: Strategy = {
         id: data?.strategy,
         name: data?.strategy,
+        dao: position.dao,
+        blockchain: position.blockchain,
+        protocol: position.protocol,
         description:
           positionConfig?.find((item: PositionConfig) => item.function_name === data?.strategy)
             ?.description ?? '',
         percentage: data?.percentage,
-        blockchain: data?.blockchain,
-        protocol: data?.protocol,
-        position_id: data?.position_id,
-        position_name: position?.lptokenName,
+        position_name: position.lptokenName,
         rewards_address: data?.rewards_address,
         max_slippage: data?.max_slippage,
         token_out_address: data?.token_out_address,
@@ -120,7 +111,7 @@ const CustomForm = (props: CustomFormProps) => {
         bpt_address: data?.bpt_address,
       }
 
-      dispatch(setSetupCreate(setup as Strategy))
+      dispatch(setSetupCreate(setup))
 
       dispatch(setSetupStatus('create' as SetupStatus))
     },
@@ -161,7 +152,6 @@ const CustomForm = (props: CustomFormProps) => {
             <BoxWrapperColumn gap={2}>
               <InputRadio
                 name={'strategy'}
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 onChange={handleStrategyChange}
                 options={positionConfig.map((item: PositionConfig) => {
                   return {
@@ -319,18 +309,13 @@ const CustomFormMemoized = React.memo(CustomForm)
 const Form = ({ position }: { position: Position }) => {
   const [open, setOpen] = React.useState(false)
 
-  const router = useRouter()
-
   const handleClickOpen = React.useCallback(() => {
     setOpen(true)
-    // neutralizeBack(handleClose)
   }, [])
 
   const handleClose = React.useCallback(() => {
     setOpen(false)
-    // revivalBack()
-    router.back()
-  }, [router])
+  }, [])
 
   return (
     <>

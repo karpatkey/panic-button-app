@@ -22,7 +22,7 @@ const TRANSACTION_BUILDER_FILE_PATH =
   'roles_royce/roles_royce/applications/execution_app/transaction_builder.py'
 
 export enum DEFAULT_VALUES_KEYS {
-  position_id = 'position_id',
+  dao = 'dao',
   protocol = 'protocol',
   blockchain = 'blockchain',
   strategy = 'strategy',
@@ -34,7 +34,6 @@ export enum DEFAULT_VALUES_KEYS {
 }
 
 export type DEFAULT_VALUES_TYPE = {
-  [DEFAULT_VALUES_KEYS.position_id]: Maybe<string>
   [DEFAULT_VALUES_KEYS.protocol]: Maybe<string>
   [DEFAULT_VALUES_KEYS.blockchain]: Maybe<string>
   [DEFAULT_VALUES_KEYS.strategy]: Maybe<string>
@@ -50,8 +49,8 @@ export const PARAMETERS_CONFIG: {
     placeholder: string
   }
 } = {
-  [DEFAULT_VALUES_KEYS.position_id]: {
-    placeholder: 'Position ID',
+  [DEFAULT_VALUES_KEYS.dao]: {
+    placeholder: 'Dao',
   },
   [DEFAULT_VALUES_KEYS.protocol]: {
     placeholder: 'Protocol',
@@ -124,8 +123,6 @@ export const getStrategyByPositionId = (
     (position: any) => position.position_id_tech.toLowerCase() === pool_id,
   )
 
-  console.log(position)
-
   return {
     commonConfig: daoItem?.general_parameters ?? [],
     positionConfig: position?.exec_config ?? [],
@@ -133,7 +130,6 @@ export const getStrategyByPositionId = (
 }
 
 export const getDAOFilePath = (executionType: EXECUTION_TYPE) => {
-  // const DAO_ITEM: DAO_MAPPER_TYPE | undefined = getStrategies(dao, blockchain)
   switch (executionType) {
     case 'execute':
       return EXECUTE_FILE_PATH

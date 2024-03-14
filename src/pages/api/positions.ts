@@ -41,7 +41,6 @@ export default withApiAuthRequired(async function handler(
 
   try {
     const { data, error } = await getPositions(daos)
-    // console.log('data', data)
 
     if (error) {
       return res.status(500).json({ error })

@@ -54,20 +54,15 @@ const MIN_USD_AMOUNT = 5000
 
 async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }> {
   const dwallets = daos.map((dao) => ({ dao, wallets: daoWallets(dao) }))
-  // console.log('daos', daos, dwallets)
   const wallets = dwallets.flatMap((dw) => dw.wallets)
   const walletPositions = await debank.getPositions(wallets)
-  // console.log(wallets, walletPositions)
 
   const walletDao = new Map<string, string>(
     dwallets.flatMap(({ dao, wallets }) => wallets.map((wallet) => [wallet, dao])),
   )
 
-  // console.log(walletDao)
-
   const data = walletPositions.flatMap((walletPosition) => {
     const dao = walletDao.get(walletPosition.wallet)
-    // console.log('positions', walletPosition.positions)
     return walletPosition.positions
       .map((position: any) => {
         const lptokenName = lptokenNameFromPosition(position)
