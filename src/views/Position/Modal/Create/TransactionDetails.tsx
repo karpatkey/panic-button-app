@@ -100,6 +100,7 @@ export const TransactionDetails = () => {
       percentage,
       dao,
       position_name,
+      pool_id,
       protocol,
       blockchain,
       bpt_address,
@@ -111,6 +112,7 @@ export const TransactionDetails = () => {
     const parameters = {
       execution_type: 'transaction_builder',
       dao,
+      pool_id,
       strategy,
       percentage,
       position_name,

@@ -103,6 +103,10 @@ export default withApiAuthRequired(async function handler(
         }
       }
 
+      if (!pool_id || !protocol || !strategy) {
+        return res.status(500).json({ status: 500, error: 'Missing params' })
+      }
+
       // Add the rest of the parameters if needed
       if (percentage) {
         parameters.push('--percentage')
@@ -127,7 +131,6 @@ export default withApiAuthRequired(async function handler(
           daosConfigs,
           dao as DAO,
           blockchain as unknown as BLOCKCHAIN,
-          // protocol,
           pool_id || '',
         )
         const positionConfigItemFound = positionConfig?.find(
