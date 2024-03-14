@@ -46,6 +46,7 @@ export type Strategy = {
   id: string
   dao: string
   name: string
+  pool_id: string
   description: string
   rewards_address: Maybe<string>
   max_slippage: Maybe<number>

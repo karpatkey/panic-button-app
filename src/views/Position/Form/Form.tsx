@@ -97,6 +97,7 @@ const CustomForm = (props: CustomFormProps) => {
         id: data?.strategy,
         name: data?.strategy,
         dao: position.dao,
+        pool_id: position.pool_id,
         blockchain: position.blockchain,
         protocol: position.protocol,
         description:
