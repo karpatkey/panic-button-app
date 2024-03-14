@@ -69,7 +69,9 @@ const Protocols = new Map([
 // }
 
 import kitchen_data from './kitchen.json'
-const PositionNames = new Map(kitchen_data.map((d) => [d.lptoken_address, d.lptoken_name]))
+const PositionNamesFromPoolId = new Map(
+  kitchen_data.map((d) => [d.lptoken_address, d.lptoken_name]),
+)
 
 function transformEntry(wallet: string, entry: any) {
   const protocol_name = Protocols.get(entry.name) || entry.name
@@ -88,7 +90,7 @@ function transformEntry(wallet: string, entry: any) {
 
     const position_type = i.name
     const pool_id = i.pool.id
-    const lptoken_name = PositionNames.get(pool_id)
+    const lptoken_name = PositionNamesFromPoolId.get(pool_id) || i.detail.description
 
     return {
       usd_amount: i.stats.asset_usd_value,
