@@ -32,14 +32,13 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
 
   const [error, setError] = React.useState<Error | null>(null)
 
-  const { blockchain } = state?.setup?.create?.value ?? {}
+  const { blockchain, dao } = state?.setup?.create?.value ?? {}
   const { transaction, decodedTransaction } = state?.setup?.transactionBuild?.value ?? {}
   const transactionBuildStatus = state?.setup?.transactionBuild?.status ?? null
   const transactionCheckStatus = state?.setup?.transactionCheck?.status ?? null
   const simulationStatus = state?.setup?.simulation?.status ?? null
   const confirmStatus = state?.setup?.confirm?.status ?? null
   const txHash = state?.setup?.confirm?.value?.txHash ?? null
-  // const selectedDAO = state?.selectedPosition?.dao ?? null
   const isLoading = confirmStatus == 'loading'
 
   // Get env network data
@@ -47,7 +46,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
 
   const isDisabled = React.useMemo(
     () =>
-      // !selectedDAO ||
+      !dao ||
       !blockchain ||
       !transaction ||
       !decodedTransaction ||
@@ -56,8 +55,8 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       simulationStatus == 'loading' ||
       simulationStatus == 'not done',
     [
-      // selectedDAO,
       blockchain,
+      dao,
       transaction,
       decodedTransaction,
       transactionBuildStatus,
@@ -80,7 +79,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
         execution_type: 'execute',
         transaction: transaction,
         blockchain,
-        // dao: selectedDAO,
+        dao,
       }
 
       const response = await fetch('/api/execute', {

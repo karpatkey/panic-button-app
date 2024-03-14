@@ -68,33 +68,8 @@ const Protocols = new Map([
 //     : pool_id
 // }
 
-// export function transformPosition({ protocol_name, position_type, chain, position, symbol }) {
-//   console.log({ protocol_name, position_type, chain, position, symbol })
-//   if (protocol_name == 'Aura' && position_type == 'Locked') {
-//     return 'Locked AURA'
-//   }
-//   if (protocol_name == 'Lido' && chain == 'gnosis') {
-//     return symbol
-//   }
-//   if (typeof position == 'number') {
-//     return position
-//   }
-//   if (typeof position == 'string') {
-//     return position.replace('-', '/').replace('-vault', '').replace('#', '')
-//   }
-//   return symbol
-// }
-
-// import debank_data from './debank_data.json'
 import kitchen_data from './kitchen.json'
-//
-// const DebankMappings = new Map(
-//   debank_data.map((d) => [[d.protocol, d.debank_position_name, d.blockchain], d])
-// )
-//
 const PositionNames = new Map(kitchen_data.map((d) => [d.lptoken_address, d.lptoken_name]))
-
-console.log(PositionNames)
 
 function transformEntry(wallet: string, entry: any) {
   const protocol_name = Protocols.get(entry.name) || entry.name
@@ -114,7 +89,6 @@ function transformEntry(wallet: string, entry: any) {
     const position_type = i.name
     const pool_id = i.pool.id
     const lptoken_name = PositionNames.get(pool_id)
-    console.log({ chain, pool_id, lptoken_name })
 
     return {
       usd_amount: i.stats.asset_usd_value,

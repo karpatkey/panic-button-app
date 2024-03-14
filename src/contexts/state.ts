@@ -44,6 +44,7 @@ export type DBankInfo = {
 
 export type Strategy = {
   id: string
+  dao: string
   name: string
   description: string
   rewards_address: Maybe<string>
@@ -54,7 +55,6 @@ export type Strategy = {
   percentage: Maybe<number>
   blockchain: Maybe<string>
   protocol: Maybe<string>
-  position_id: Maybe<string>
   position_name: Maybe<string>
 }
 
