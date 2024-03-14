@@ -1,20 +1,18 @@
-import ErrorBoundaryWrapper from 'src/components/ErrorBoundary/ErrorBoundaryWrapper'
-import React from 'react'
-import PaperSection from 'src/components/PaperSection'
-import { useApp } from 'src/contexts/app.context'
-import List from 'src/views/Positions/List'
-import BoxContainerWrapper from 'src/components/Wrappers/BoxContainerWrapper'
-import Loading from 'src/components/Loading'
-import { TextField, IconButton } from '@mui/material'
 import { SearchOutlined } from '@mui/icons-material'
-import { HEADER_HEIGHT } from 'src/components/Layout/Header'
-import { FOOTER_HEIGHT } from 'src/components/Layout/Footer'
-import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
+import { IconButton, TextField } from '@mui/material'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import React from 'react'
 import { DAOFilter } from 'src/components/DAOFilter'
-import { filter, setSearch } from 'src/contexts/reducers'
+import ErrorBoundaryWrapper from 'src/components/ErrorBoundary/ErrorBoundaryWrapper'
+import { FOOTER_HEIGHT } from 'src/components/Layout/Footer'
+import { HEADER_HEIGHT } from 'src/components/Layout/Header'
+import Loading from 'src/components/Loading'
+import PaperSection from 'src/components/PaperSection'
+import BoxContainerWrapper from 'src/components/Wrappers/BoxContainerWrapper'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
-import { Position, Status } from 'src/contexts/state'
-import { getStrategy } from 'src/utils/strategies'
+import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
+import { usePositions } from 'src/queries/positions'
+import List from 'src/views/Positions/List'
 
 interface SearchPositionProps {
   onChange: (value: string) => void
@@ -33,28 +31,36 @@ const SearchPosition = (props: SearchPositionProps) => {
           <IconButton>
             <SearchOutlined />
           </IconButton>
-        )
+        ),
       }}
     />
   )
 }
 
 const WrapperPositions = () => {
-  const { dispatch, state } = useApp()
-  const { status } = state
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+  const positions = usePositions()
+  const { isFetched } = positions
 
-  const onChange = React.useCallback(
-    (value: string) => {
-      dispatch(setSearch(value))
-      dispatch(filter())
-    },
-    [dispatch]
-  )
+  const handleSearch = (term: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (term) {
+      params.set('query', term)
+    } else {
+      params.delete('query')
+    }
+
+    const p = params.toString()
+    const uri = p ? `${pathname}?${p}` : pathname
+    router.push(uri)
+  }
 
   return (
     <ErrorBoundaryWrapper>
       <BoxContainerWrapper>
-        {status === Status.Loading ? (
+        {!isFetched ? (
           <Loading minHeight={`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px)`} />
         ) : (
           <BoxWrapperColumn>
@@ -63,7 +69,7 @@ const WrapperPositions = () => {
             </BoxWrapperRow>
             <PaperSection title="Positions">
               <BoxWrapperRow gap={2} sx={{ justifyContent: 'space-between' }}>
-                <SearchPosition onChange={onChange} />
+                <SearchPosition onChange={handleSearch} />
               </BoxWrapperRow>
               <List />
             </PaperSection>

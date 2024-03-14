@@ -9,7 +9,8 @@ export const AmountValue = ({ value }: Props) => {
   const formattedValue = React.useMemo(() => {
     const formatter = new Intl.NumberFormat('en-US')
 
-    return formatter.format(Math.round(value))
+    const amount = value > 10 ? Math.round(value) : value
+    return formatter.format(amount)
   }, [value])
 
   return (
@@ -22,7 +23,7 @@ export const AmountValue = ({ value }: Props) => {
         lineHeight: '14px',
         color: 'custom.grey.dark',
         letterSpacing: '-0.02em',
-        textAlign: 'end'
+        textAlign: 'end',
       }}
     >
       {formattedValue}

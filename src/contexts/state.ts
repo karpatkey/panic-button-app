@@ -1,24 +1,23 @@
 export enum Status {
   Loading = 'Loading',
-  Finished = 'Finished'
+  Finished = 'Finished',
 }
 
 export type Token = {
   symbol: string
-  supply: number
-  borrow: number
+  as: 'supply' | 'borrow' | 'reward' | 'other'
+  amount: number
   price: number
-  updatedAt: number
+  // updatedAt: number
 }
 
 export type Position = {
-  position_id: string
   dao: string
+  pool_id: string
   protocol: string
   blockchain: string
   lptoken_address: string
-  lptoken_name: string
-  isActive?: boolean
+  lptokenName: string
   tokens?: Token[]
 }
 
@@ -61,12 +60,12 @@ export enum SetupItemStatus {
   NotDone = 'not done',
   Loading = 'loading',
   Failed = 'failed',
-  Success = 'success'
+  Success = 'success',
 }
 
 export enum State {
   Active = 'Active',
-  Inactive = 'Inactive'
+  Inactive = 'Inactive',
 }
 
 export enum SetupStatus {
@@ -76,60 +75,44 @@ export enum SetupStatus {
   TransactionCheck = 'transaction_check',
   Simulation = 'simulation',
   Confirm = 'confirm',
-  Error = 'error'
+  Error = 'error',
 }
 
 export const initialState: InitialState = {
   status: Status.Loading,
-  positions: [],
-  filteredPositions: [],
   daosConfigs: [],
-  selectedPosition: null,
-  selectedState: State.Active,
-  search: null,
-  DAOs: [],
-  selectedDAO: null,
-  isFetchingTokens: false,
+  daos: [],
   envNetworkData: null,
-  loadedDebank: false,
   setup: {
     status: SetupStatus.Loading,
     create: {
       value: null,
-      status: SetupItemStatus.NotDone
+      status: SetupItemStatus.NotDone,
     },
     transactionBuild: {
       value: null,
-      status: SetupItemStatus.NotDone
+      status: SetupItemStatus.NotDone,
     },
     transactionCheck: {
       value: null,
-      status: SetupItemStatus.NotDone
+      status: SetupItemStatus.NotDone,
     },
     simulation: {
       value: null,
-      status: SetupItemStatus.NotDone
+      status: SetupItemStatus.NotDone,
     },
     confirm: {
       value: null,
-      status: SetupItemStatus.NotDone
-    }
-  }
+      status: SetupItemStatus.NotDone,
+    },
+  },
 }
 
 export type InitialState = {
   status: Status
-  positions: Position[]
-  filteredPositions: Position[]
   daosConfigs: any[]
-  selectedPosition: Maybe<Position>
-  search: Maybe<string>
-  DAOs: string[]
-  selectedDAO: Maybe<string>
-  selectedState: Maybe<State>
-  isFetchingTokens: boolean
+  daos: string[]
   envNetworkData: Maybe<any>
-  loadedDebank: boolean
   setup: {
     status: SetupStatus
     create: {

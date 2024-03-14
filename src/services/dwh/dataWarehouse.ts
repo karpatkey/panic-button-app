@@ -1,15 +1,15 @@
 import { BigQuery } from '@google-cloud/bigquery'
-import { GOOGLE_CREDS, GOOGLE_PROJECT_ID, DATA_WAREHOUSE_ENV } from 'src/config/constants'
+import { DATA_WAREHOUSE_ENV, GOOGLE_CREDS, GOOGLE_PROJECT_ID } from 'src/config/constants'
 
 type DataWarehouseEnvironment = 'production' | 'development'
 
 const REPORTS_DATASET = {
   development: {
-    getPositions: 'reports.vw_position_list'
+    getPositions: 'reports.vw_position_list',
   },
   production: {
-    getPositions: 'reports_production.prod_position_list'
-  }
+    getPositions: 'reports_production.prod_position_list',
+  },
 }
 
 export class DataWarehouse {
@@ -19,7 +19,7 @@ export class DataWarehouse {
   private constructor() {
     this.bigQuery = new BigQuery({
       projectId: GOOGLE_PROJECT_ID,
-      credentials: GOOGLE_CREDS
+      credentials: GOOGLE_CREDS,
     })
   }
 
@@ -43,7 +43,7 @@ export class DataWarehouse {
       params = { daos: DAOs }
     }
 
-    return this.executeCommonJobQuery(viewQuery, params)
+    return await this.executeCommonJobQuery(viewQuery, params)
   }
 
   async getPositionById(id: string) {
@@ -51,7 +51,7 @@ export class DataWarehouse {
       REPORTS_DATASET[DATA_WAREHOUSE_ENV as unknown as DataWarehouseEnvironment]['getPositions']
     const viewQuery = `SELECT * FROM  \`karpatkey-data-warehouse.${table}\` where position_id = @id`
 
-    return this.executeCommonJobQuery(viewQuery, { id })
+    return await this.executeCommonJobQuery(viewQuery, { id })
   }
 
   private async executeCommonJobQuery(viewQuery: string, params = {}) {
@@ -59,7 +59,7 @@ export class DataWarehouse {
       query: viewQuery,
       params,
       // Location must match that of the dataset(s) referenced in the query.
-      location: 'US'
+      location: 'US',
     }
 
     // Run the query as a job
