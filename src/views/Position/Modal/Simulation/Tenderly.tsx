@@ -62,6 +62,8 @@ export const Tenderly = () => {
 
   const onSimulate = React.useCallback(async () => {
     try {
+      if (isLoading) return
+
       dispatch(setSetupSimulation(null))
       dispatch(setSetupStatus('simulation' as SetupStatus))
       dispatch(setSetupSimulationStatus('loading' as SetupItemStatus))
@@ -120,12 +122,6 @@ export const Tenderly = () => {
       onSimulate().then(() => console.log('Simulation finished'))
     }
   }, [isDisabled, simulationStatus, isLoading, onSimulate])
-
-  React.useEffect(() => {
-    if (!isDisabled && simulationStatus === 'not done') {
-      onSimulate().then(() => console.log('Simulation finished'))
-    }
-  }, [blockchain, transaction, dispatch, isDisabled, simulationStatus, onSimulate])
 
   const showSimulateButton = !isLoading && !shareUrl && !isDisabled
   return (
