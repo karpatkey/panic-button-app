@@ -1,18 +1,13 @@
 import { Box } from '@mui/material'
-import * as React from 'react'
-import Card from 'src/views/Positions/Card'
-import { Position, Status } from 'src/contexts/state'
-import { useApp } from 'src/contexts/app.context'
 import EmptyData from 'src/components/EmptyData'
+import { Position } from 'src/contexts/state'
+import { usePositions } from 'src/queries/positions'
+import Card from 'src/views/Positions/Card'
 
 const List = () => {
-  const { state } = useApp()
-  const { filteredPositions, search, status } = state
+  const { data: filteredPositions, isPending } = usePositions()
 
-  if (
-    (filteredPositions?.length === 0 && !search) ||
-    (filteredPositions?.length === 0 && status === Status.Finished)
-  ) {
+  if (isPending) {
     return <EmptyData />
   }
 
@@ -22,7 +17,7 @@ const List = () => {
         display: 'flex',
         flexWrap: 'wrap',
         justifyContent: 'center',
-        gap: '20px 20px'
+        gap: '20px 20px',
       }}
     >
       {filteredPositions.map((position: Position, index: number) => {
@@ -35,7 +30,7 @@ const List = () => {
               padding: '12px 12px',
               border: '1px solid #B6B6B6',
               background: 'background.paper',
-              borderRadius: '8px'
+              borderRadius: '8px',
             }}
           >
             <Card id={index} key={index} position={position} />

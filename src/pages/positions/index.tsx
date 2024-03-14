@@ -1,80 +1,28 @@
-import PageLayout from 'src/components/Layout/Layout'
+import { getSession, Session } from '@auth0/nextjs-auth0'
+import { withPageAuthRequired } from '@auth0/nextjs-auth0/client'
+import { NextApiRequest, NextApiResponse } from 'next'
 import * as React from 'react'
 import { ReactElement } from 'react'
-import WrapperPositions from 'src/views/Positions/WrapperPositions'
+import PageLayout from 'src/components/Layout/Layout'
 import { useApp } from 'src/contexts/app.context'
-import { DataWarehouse } from 'src/services/classes/dataWarehouse.class'
-import { withPageAuthRequired } from '@auth0/nextjs-auth0/client'
-import { getSession, Session } from '@auth0/nextjs-auth0'
-import { NextApiRequest, NextApiResponse } from 'next'
-import {
-  updateStatus,
-  addPositions,
-  addDAOs,
-  clearSearch,
-  filter,
-  addDaosConfigs,
-  updatePositionsWithTokenBalances,
-  updateIsFetchingTokens
-} from 'src/contexts/reducers'
-import { Position, Status } from 'src/contexts/state'
+import { addDAOs, addDaosConfigs } from 'src/contexts/reducers'
 import { getDaosConfigs } from 'src/utils/jsonsFetcher'
+import WrapperPositions from 'src/views/Positions/WrapperPositions'
 
 interface PositionsPageProps {
-  positions: Position[]
-  DAOs: string[]
+  daos: string[]
   daosConfigs: any
 }
 
 const PositionsPage = (props: PositionsPageProps) => {
-  const { positions = [], DAOs, daosConfigs = [] } = props
+  const { daos, daosConfigs = [] } = props
 
-  const { dispatch, state } = useApp()
-  const { status, loadedDebank, isFetchingTokens } = state
-
-  React.useEffect(() => {
-    const start = () => {
-      dispatch(updateStatus('Loading' as Status))
-
-      dispatch(addDAOs(DAOs))
-      dispatch(addPositions(positions))
-      dispatch(addDaosConfigs(daosConfigs))
-      dispatch(clearSearch())
-      dispatch(filter())
-
-      dispatch(updateStatus('Finished' as Status))
-
-      dispatch(updateStatus('Finished' as Status))
-    }
-
-    start()
-  }, [dispatch, DAOs, positions, daosConfigs])
+  const { dispatch } = useApp()
 
   React.useEffect(() => {
-    const start = async () => {
-      try {
-        if (loadedDebank) return
-        if (status !== 'Finished') return
-
-        console.log('fetching tokens', isFetchingTokens, status)
-
-        dispatch(updateIsFetchingTokens(true))
-        const response = await fetch('/api/dbank')
-        const { data = [] } = await response.json()
-        if (data?.status == false) {
-          // Handle possible error
-        } else {
-          dispatch(updatePositionsWithTokenBalances(data))
-          dispatch(filter())
-          dispatch(updateIsFetchingTokens(false))
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    }
-
-    start()
-  }, [dispatch, isFetchingTokens, loadedDebank, status])
+    dispatch(addDAOs(daos))
+    dispatch(addDaosConfigs(daosConfigs))
+  }, [dispatch, daos, daosConfigs])
 
   return <WrapperPositions />
 }
@@ -95,8 +43,8 @@ export const getServerSideProps = async (context: {
   if (!session) {
     return {
       props: {
-        positions: []
-      }
+        daos: [],
+      },
     }
   }
 
@@ -105,11 +53,9 @@ export const getServerSideProps = async (context: {
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
     : []
 
-  const DAOs = roles
+  const daos = roles
 
-  const dataWarehouse = DataWarehouse.getInstance()
-  const positions: Position[] = await dataWarehouse.getPositions(DAOs)
-  const daosConfigs = await getDaosConfigs(DAOs)
+  const daosConfigs = await getDaosConfigs(daos)
 
-  return { props: { positions, DAOs, daosConfigs } }
+  return { props: { daos, daosConfigs } }
 }

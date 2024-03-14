@@ -1,34 +1,27 @@
+import { getSession, Session } from '@auth0/nextjs-auth0'
+import { withPageAuthRequired } from '@auth0/nextjs-auth0/client'
+import Button from '@mui/material/Button'
+import { NextApiRequest, NextApiResponse } from 'next'
 import * as React from 'react'
 import { ReactElement } from 'react'
-import PageLayout from 'src/components/Layout/Layout'
-import { useApp } from 'src/contexts/app.context'
-import { DataWarehouse } from 'src/services/classes/dataWarehouse.class'
-import BoxContainerWrapper from 'src/components/Wrappers/BoxContainerWrapper'
-import PositionDetail from 'src/views/Position/WrappedPosition'
-import { withPageAuthRequired } from '@auth0/nextjs-auth0/client'
-import { getSession, Session } from '@auth0/nextjs-auth0'
-import { NextApiRequest, NextApiResponse } from 'next'
-import {
-  clearSelectedPosition,
-  setSelectedPosition,
-  updateEnvNetworkData,
-  updateStatus,
-  addDaosConfigs
-} from 'src/contexts/reducers'
-import { Position, Status } from 'src/contexts/state'
-import Loading from 'src/components/Loading'
-import { HEADER_HEIGHT } from 'src/components/Layout/Header'
-import { FOOTER_HEIGHT } from 'src/components/Layout/Footer'
 import CustomTypography from 'src/components/CustomTypography'
-import Button from '@mui/material/Button'
+import PageLayout from 'src/components/Layout/Layout'
+import BoxContainerWrapper from 'src/components/Wrappers/BoxContainerWrapper'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
+import { useApp } from 'src/contexts/app.context'
+import { addDaosConfigs, updateEnvNetworkData } from 'src/contexts/reducers'
+import { Position } from 'src/contexts/state'
 import { getDaosConfigs } from 'src/utils/jsonsFetcher'
+import PositionDetail from 'src/views/Position/WrappedPosition'
 
 interface PositionIndexProps {
   positionId: Maybe<string>
   position: Maybe<Position>
   ENV_NETWORK_DATA: any
   daosConfigs: any[]
+  dao: string
+  chain: string
+  pool_id: string
 }
 
 const PositionDoesntExist = () => {
@@ -44,37 +37,28 @@ const PositionDoesntExist = () => {
   )
 }
 
-const PositionIndex = (props: PositionIndexProps): ReactElement => {
-  const { position, ENV_NETWORK_DATA, daosConfigs } = props
+import { usePosition } from 'src/queries/positions'
 
-  const { dispatch, state } = useApp()
-  const { status } = state
+const PositionIndex = (props: PositionIndexProps): ReactElement => {
+  const { dao, chain, pool_id, ENV_NETWORK_DATA, daosConfigs } = props
+
+  const { dispatch } = useApp()
+
+  const { data: position } = usePosition(dao, chain, pool_id)
 
   React.useEffect(() => {
-    dispatch(updateStatus('Loading' as Status))
     dispatch(addDaosConfigs(daosConfigs))
-    if (!position) {
-      dispatch(clearSelectedPosition())
-    } else {
-      dispatch(setSelectedPosition(position))
-    }
-
     dispatch(updateEnvNetworkData(ENV_NETWORK_DATA))
-
-    dispatch(updateStatus('Finished' as Status))
-  }, [position, dispatch, daosConfigs])
+  }, [dispatch, daosConfigs, ENV_NETWORK_DATA])
 
   return (
     <>
-      {status === 'Loading' && (
-        <Loading minHeight={`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px)`} />
-      )}
-      {status === 'Finished' && position && (
+      {position && (
         <BoxContainerWrapper>
-          <PositionDetail />
+          <PositionDetail position={position} />
         </BoxContainerWrapper>
       )}
-      {status === 'Finished' && !position && <PositionDoesntExist />}
+      {!position && <PositionDoesntExist />}
     </>
   )
 }
@@ -88,17 +72,19 @@ export default withPageAuthRequired(PositionIndex)
 const getServerSideProps = async (context: {
   req: NextApiRequest
   res: NextApiResponse
-  params: { id: string }
+  params: { dao: string; chain: string; pool_id: string }
 }) => {
-  const { req, res, params: { id = '' } = {} } = context
+  const { req, res, params: { dao = '', chain = '', pool_id = '' } = {} } = context
   const session = await getSession(req as any, res as any)
 
   if (!session) {
     return {
       props: {
-        positionId: null,
-        position: null
-      }
+        daos: [],
+        dao,
+        chain,
+        pool_id,
+      },
     }
   }
 
@@ -107,12 +93,7 @@ const getServerSideProps = async (context: {
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
     : []
 
-  const DAOs = roles
-
-  const dataWarehouse = DataWarehouse.getInstance()
-  const positionDW = (await dataWarehouse.getPositionById(id))?.[0]
-
-  const position = positionDW && DAOs.includes(positionDW.dao) ? positionDW : null
+  const daos = roles
 
   const ENV_NETWORK_DATA = {
     MODE: process?.env?.MODE ?? 'development',
@@ -121,18 +102,20 @@ const getServerSideProps = async (context: {
     LOCAL_FORK_HOST_ETHEREUM: process?.env?.LOCAL_FORK_HOST_ETHEREUM ?? 'anvil_ethereum',
     LOCAL_FORK_PORT_ETHEREUM: process?.env?.LOCAL_FORK_PORT_ETHEREUM ?? 8546,
     LOCAL_FORK_HOST_GNOSIS: process?.env?.LOCAL_FORK_HOST_GNOSIS ?? 'anvil_gnosis',
-    LOCAL_FORK_PORT_GNOSIS: process?.env?.LOCAL_FORK_PORT_GNOSIS ?? 8547
+    LOCAL_FORK_PORT_GNOSIS: process?.env?.LOCAL_FORK_PORT_GNOSIS ?? 8547,
   }
 
   const daosConfigs = await getDaosConfigs(roles)
 
   return {
     props: {
-      positionId: id,
-      position,
+      daos: daos,
       ENV_NETWORK_DATA,
-      daosConfigs
-    }
+      daosConfigs,
+      dao,
+      chain,
+      pool_id,
+    },
   }
 }
 

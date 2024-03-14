@@ -1,8 +1,6 @@
-import { withApiAuthRequired } from '@auth0/nextjs-auth0'
+import { Session, getSession, withApiAuthRequired } from '@auth0/nextjs-auth0'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getSession, Session } from '@auth0/nextjs-auth0'
-import { dBankPromise } from 'src/utils/dbank'
-import { daoWallets } from 'src/config/constants'
+import { getPositions } from 'src/services/positions'
 
 type Status = {
   data?: Maybe<any>
@@ -11,7 +9,7 @@ type Status = {
 
 export default withApiAuthRequired(async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Status>
+  res: NextApiResponse<Status>,
 ) {
   // Should be a get request
   if (req.method !== 'GET') {
@@ -39,17 +37,17 @@ export default withApiAuthRequired(async function handler(
     return
   }
 
-  const wallets = roles.flatMap((dao) => daoWallets(dao))
+  const daos = roles
 
   try {
-    const parameters = ['--wallets', wallets.join(',')]
-    const { data, error } = await dBankPromise(parameters)
+    const { data, error } = await getPositions(daos)
+    // console.log('data', data)
 
     if (error) {
       return res.status(500).json({ error })
     }
 
-    return res.status(200).json({ data })
+    return res.status(200).json(data)
   } catch (error) {
     console.error('ERROR Reject: ', error)
   }

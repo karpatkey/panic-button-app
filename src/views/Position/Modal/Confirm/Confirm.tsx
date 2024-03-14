@@ -1,16 +1,16 @@
-import CustomTypography from 'src/components/CustomTypography'
+import { Box, Link } from '@mui/material'
 import Button from '@mui/material/Button'
+import { TransactionReceipt, ethers } from 'ethers'
 import * as React from 'react'
 import { AccordionBoxWrapper } from 'src/components/Accordion/AccordionBoxWrapper'
-import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
-import { SetupItemStatus, SetupStatus } from 'src/contexts/state'
-import { useApp } from 'src/contexts/app.context'
-import { Box, Link } from '@mui/material'
-import { setSetupConfirm, setSetupConfirmStatus, setSetupStatus } from 'src/contexts/reducers'
-import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
-import { ethers, TransactionReceipt } from 'ethers'
+import CustomTypography from 'src/components/CustomTypography'
 import StatusLabel from 'src/components/StatusLabel'
 import TextLoadingDots from 'src/components/TextLoadingDots'
+import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
+import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
+import { useApp } from 'src/contexts/app.context'
+import { setSetupConfirm, setSetupConfirmStatus, setSetupStatus } from 'src/contexts/reducers'
+import { SetupItemStatus, SetupStatus } from 'src/contexts/state'
 
 const WaitingExecutingTransaction = () => {
   return (
@@ -39,7 +39,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
   const simulationStatus = state?.setup?.simulation?.status ?? null
   const confirmStatus = state?.setup?.confirm?.status ?? null
   const txHash = state?.setup?.confirm?.value?.txHash ?? null
-  const selectedDAO = state?.selectedPosition?.dao ?? null
+  // const selectedDAO = state?.selectedPosition?.dao ?? null
   const isLoading = confirmStatus == 'loading'
 
   // Get env network data
@@ -47,7 +47,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
 
   const isDisabled = React.useMemo(
     () =>
-      !selectedDAO ||
+      // !selectedDAO ||
       !blockchain ||
       !transaction ||
       !decodedTransaction ||
@@ -56,14 +56,14 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       simulationStatus == 'loading' ||
       simulationStatus == 'not done',
     [
-      selectedDAO,
+      // selectedDAO,
       blockchain,
       transaction,
       decodedTransaction,
       transactionBuildStatus,
       transactionCheckStatus,
-      simulationStatus
-    ]
+      simulationStatus,
+    ],
   )
 
   const onExecute = React.useCallback(async () => {
@@ -80,16 +80,16 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
         execution_type: 'execute',
         transaction: transaction,
         blockchain,
-        dao: selectedDAO
+        // dao: selectedDAO,
       }
 
       const response = await fetch('/api/execute', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(parameters)
+        body: JSON.stringify(parameters),
       })
 
       const body = await response.json()
@@ -142,15 +142,14 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       setError(err as Error)
       dispatch(setSetupConfirmStatus('failed' as SetupItemStatus))
     }
-  }, [isDisabled, dispatch, transaction, blockchain, selectedDAO, ENV_NETWORK_DATA])
-
+  }, [isDisabled, dispatch, transaction, blockchain, ENV_NETWORK_DATA])
 
   return (
     <AccordionBoxWrapper
       gap={2}
       sx={{
         m: 3,
-        backgroundColor: 'background.default'
+        backgroundColor: 'background.default',
       }}
     >
       <BoxWrapperColumn gap={4} sx={{ width: '100%', marginY: '14px', justifyContent: 'center' }}>

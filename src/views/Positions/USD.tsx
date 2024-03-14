@@ -9,7 +9,8 @@ export const USD = ({ value }: USDProps) => {
   const formattedValue = React.useMemo(() => {
     const USDollar = new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD',
+      maximumFractionDigits: 0,
     })
 
     return USDollar.format(+value)
@@ -24,7 +25,7 @@ export const USD = ({ value }: USDProps) => {
         lineHeight: '14px',
         color: 'custom.grey.dark',
         letterSpacing: '-0.02em',
-        textAlign: 'end'
+        textAlign: 'end',
       }}
     >
       {formattedValue}
