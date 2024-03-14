@@ -1,3 +1,5 @@
+import { ExecConfig } from 'src/config/strategies/manager'
+
 export enum Status {
   Loading = 'Loading',
   Finished = 'Finished',
@@ -19,6 +21,11 @@ export type Position = {
   lptoken_address: string
   lptokenName: string
   tokens?: Token[]
+}
+
+export type PositionWithStrategies = Position & {
+  isActive: boolean
+  strategies: ExecConfig
 }
 
 export type DBankInfo = {

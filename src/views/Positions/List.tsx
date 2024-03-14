@@ -1,11 +1,70 @@
 import { Box } from '@mui/material'
+import { useSearchParams } from 'next/navigation'
+import { useMemo } from 'react'
 import EmptyData from 'src/components/EmptyData'
-import { Position } from 'src/contexts/state'
+import { useApp } from 'src/contexts/app.context'
+import { PositionWithStrategies } from 'src/contexts/state'
 import { usePositions } from 'src/queries/positions'
+import { getStrategy } from 'src/utils/strategies'
 import Card from 'src/views/Positions/Card'
 
 const List = () => {
-  const { data: filteredPositions, isPending } = usePositions()
+  const {
+    state: { daosConfigs },
+  } = useApp()
+  const { data: positions, isPending } = usePositions()
+
+  const searchParams = useSearchParams()
+
+  const positionsWithStrategies: PositionWithStrategies[] = useMemo(() => {
+    return (positions || []).map((position) => {
+      const strategies = getStrategy(daosConfigs, position)
+      return {
+        ...position,
+        strategies,
+        isActive: !!strategies.positionConfig.find((s) => s.stresstest),
+      }
+    })
+  }, [daosConfigs, positions])
+
+  const filteredPositions = useMemo(() => {
+    const queryTerms = (searchParams.get('query') || '')
+      .toLowerCase()
+      .split(' ')
+      .filter((s) => s)
+    const dao = searchParams.get('dao')
+
+    const withDao =
+      dao && dao != 'All'
+        ? positionsWithStrategies.filter((position) => position.dao == dao)
+        : positionsWithStrategies
+
+    const sorter = (a: any, b: any) => {
+      if (a.isActive && !b.isActive) return -1
+      if (!a.isActive && b.isActive) return 1
+
+      return a.usd_amount - b.usd_amount
+    }
+
+    if (queryTerms.length == 0) {
+      return withDao.sort(sorter)
+    } else {
+      return withDao
+        .filter((position) => {
+          const joined = [
+            position.dao,
+            position.lptokenName,
+            position.pool_id,
+            position.blockchain,
+            position.protocol,
+          ]
+            .join(' ')
+            .toLowerCase()
+          return !queryTerms.find((t) => joined.search(t) == -1)
+        })
+        .sort(sorter)
+    }
+  }, [positionsWithStrategies, searchParams])
 
   if (isPending) {
     return <EmptyData />
@@ -20,7 +79,7 @@ const List = () => {
         gap: '20px 20px',
       }}
     >
-      {filteredPositions.map((position: Position, index: number) => {
+      {filteredPositions.map((position, index) => {
         return (
           <Box
             key={index}

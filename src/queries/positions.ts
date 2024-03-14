@@ -4,7 +4,7 @@ import { Position } from 'src/contexts/state'
 import { slug } from 'src/utils/string'
 
 export function usePositions() {
-  return useQuery({
+  return useQuery<Position[]>({
     queryKey: ['positions'],
     queryFn: () => fetch('/api/positions').then((res) => res.json()),
   })
@@ -16,7 +16,7 @@ export function usePosition(dao: string, chain: string, pool_id: string) {
 
   const position = useMemo(() => {
     if (q.data) {
-      return findPosition(data, { dao, chain, pool_id })
+      return findPosition(data ?? [], { dao, chain, pool_id })
     }
   }, [q.data, data, dao, chain, pool_id])
 

@@ -1,10 +1,7 @@
 import Link from 'next/link'
-import * as React from 'react'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
-import { useApp } from 'src/contexts/app.context'
-import { Position } from 'src/contexts/state'
-import { getStrategy } from 'src/utils/strategies'
+import { PositionWithStrategies } from 'src/contexts/state'
 import { slug } from 'src/utils/string'
 import PositionName from 'src/views/Positions/PositionName'
 import ProtocolIcon from 'src/views/Positions/ProtocolIcon'
@@ -13,30 +10,12 @@ import { Balances } from './Balances'
 
 interface PositionProps {
   id: number
-  position: Position
+  position: PositionWithStrategies
 }
 
 const Card = (props: PositionProps) => {
-  const {
-    state: { daosConfigs },
-  } = useApp()
   const { position } = props
-  const {
-    // position_id: positionId,
-    protocol,
-    blockchain,
-    lptokenName,
-    dao,
-    // isActive,
-    tokens,
-  } = position
-
-  const isActive = React.useMemo(() => {
-    const strategies = getStrategy(daosConfigs, position)
-    // console.log(strategies)
-
-    return strategies.positionConfig.find((s) => s.stresstest)
-  }, [])
+  const { protocol, blockchain, lptokenName, dao, isActive, tokens } = position
 
   const CardWrapper = () => {
     return (
