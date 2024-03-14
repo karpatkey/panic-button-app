@@ -4,8 +4,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React, { useCallback } from 'react'
 import { DAOFilter } from 'src/components/DAOFilter'
 import ErrorBoundaryWrapper from 'src/components/ErrorBoundary/ErrorBoundaryWrapper'
-import { FOOTER_HEIGHT } from 'src/components/Layout/Footer'
-import { HEADER_HEIGHT } from 'src/components/Layout/Header'
 import Loading from 'src/components/Loading'
 import PaperSection from 'src/components/PaperSection'
 import BoxContainerWrapper from 'src/components/Wrappers/BoxContainerWrapper'
@@ -76,7 +74,7 @@ const WrapperPositions = () => {
     <ErrorBoundaryWrapper>
       <BoxContainerWrapper>
         {!isFetched ? (
-          <Loading minHeight={`calc(100vh - ${HEADER_HEIGHT}px - ${FOOTER_HEIGHT}px)`} />
+          <Loading fullPage />
         ) : (
           <BoxWrapperColumn>
             <BoxWrapperRow sx={{ justifyContent: 'flex-end' }}>
