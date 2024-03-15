@@ -321,7 +321,7 @@ const Form = ({ position }: { position: Position }) => {
   return (
     <>
       <CustomFormMemoized position={position} handleClickOpen={handleClickOpen} />
-      <Modal open={open} handleClose={handleClose} />
+      <Modal position={position} open={open} handleClose={handleClose} />
     </>
   )
 }
