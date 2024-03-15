@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import { AccordionWrapper } from 'src/components/Accordion/AccordionWrapper'
+import { AmountsPreviewFromPercentage } from 'src/components/AmountsPreviewFromPercentage'
 import CustomTypography from 'src/components/CustomTypography'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
@@ -109,16 +110,7 @@ export const SetupDetails = ({ position }: { position: Position }) => {
                       valueToDisplay = (
                         <>
                           <div>{formatPercentage(+value / 100)}</div>
-                          {(position.tokens || []).map((token: any) => {
-                            if (token.as == 'supply') {
-                              return (
-                                <>
-                                  <br />
-                                  {`${token.symbol} ${token.amount * (+value / 100)}`}
-                                </>
-                              )
-                            }
-                          })}
+                          <AmountsPreviewFromPercentage position={position} percentage={value} />
                         </>
                       )
                     } else if (key === 'max_slippage') {

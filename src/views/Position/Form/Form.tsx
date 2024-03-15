@@ -5,6 +5,7 @@ import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 
 import InfoIcon from '@mui/icons-material/Info'
 import Tooltip from '@mui/material/Tooltip'
+import { AmountsPreviewFromPercentage } from 'src/components/AmountsPreviewFromPercentage'
 import CustomTypography from 'src/components/CustomTypography'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import {
@@ -261,6 +262,12 @@ const CustomForm = (props: CustomFormProps) => {
                       errors={errors}
                       onChange={onChange}
                     />
+                    {name == 'percentage' ? (
+                      <AmountsPreviewFromPercentage
+                        position={position}
+                        percentage={watchPercentage}
+                      />
+                    ) : null}
                   </BoxWrapperColumn>
                 )
               }
