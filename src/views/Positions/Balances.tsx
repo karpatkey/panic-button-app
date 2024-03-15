@@ -1,4 +1,5 @@
 import { Box, Divider } from '@mui/material'
+import CryptoIcon from 'src/components/CryptoIcon'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import { Token } from '../../contexts/state'
@@ -18,7 +19,10 @@ export const Balances = ({ tokens }: ListItemsProps) => {
         return (
           <Box key={index}>
             <BoxWrapperColumn gap={1}>
-              <Title title={symbol} />
+              <BoxWrapperRow gap={1} sx={{ justifyContent: 'flex-start' }}>
+                <CryptoIcon symbol={symbol} />
+                <Title title={symbol} />
+              </BoxWrapperRow>
               <Divider sx={{ borderBottomWidth: 5 }} />
             </BoxWrapperColumn>
             <BoxWrapperColumn key={index} gap={1}>

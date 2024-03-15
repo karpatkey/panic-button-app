@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import CryptoIcon from 'src/components/CryptoIcon'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import { PositionWithStrategies } from 'src/contexts/state'
@@ -17,6 +18,8 @@ const Card = (props: PositionProps) => {
   const { position } = props
   const { protocol, blockchain, lptokenName, dao, isActive, tokens } = position
 
+  const blockchainSymbol = { ethereum: 'eth', gnosis: 'gno' }[blockchain]
+
   const CardWrapper = () => {
     return (
       <BoxWrapperColumn
@@ -32,9 +35,9 @@ const Card = (props: PositionProps) => {
         <BoxWrapperRow sx={{ justifyContent: 'space-between' }}>
           <BoxWrapperColumn gap={1}>
             <Title title={dao} />
-            <Title title={blockchain} />
           </BoxWrapperColumn>
           <BoxWrapperRow gap={1}>
+            <CryptoIcon size={25} symbol={blockchainSymbol || ''} />
             <ProtocolIcon protocol={protocol} />
             <Title title={protocol} />
           </BoxWrapperRow>
