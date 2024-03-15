@@ -30,6 +30,7 @@ const Detail = ({ position }: { position: Position }) => {
         borderRadius: '8px',
         padding: '30px 30px',
         minWidth: '400px',
+        width: '100%',
         maxWidth: '800px',
       }}
     >
