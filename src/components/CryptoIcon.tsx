@@ -17,7 +17,7 @@ const SYMLINK = new Map<string, string>([['weth', 'eth']])
 export default function CryptoIcon({ symbol, size }: { symbol: string; size?: number }) {
   let name = symbol.toLowerCase()
   name = SYMLINK.get(name) || name
-  const s = size || 20
+  const s = size || 16
   const ext = WITH_EXT.get(name) || 'svg'
   return <Image src={`/images/crypto/color/${name}.${ext}`} width={s} height={s} alt={symbol} />
 }
