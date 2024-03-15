@@ -3,10 +3,12 @@ import { styled } from '@mui/material'
 import Box from '@mui/material/Box'
 import Dialog from '@mui/material/Dialog'
 import IconButton from '@mui/material/IconButton'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import CustomTypography from 'src/components/CustomTypography'
 import BoxContainerWrapper from 'src/components/Wrappers/BoxContainerWrapper'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
+import { Position } from 'src/contexts/state'
 import { Confirm } from './Confirm/Confirm'
 import { SetupDetails } from './Create/SetupDetails'
 import { TransactionCheck } from './Create/TransactionCheck'
@@ -16,6 +18,7 @@ import { Stepper } from './Stepper'
 
 interface ModalProps {
   open: boolean
+  position: Position
   handleClose: () => void
 }
 
@@ -29,9 +32,8 @@ const BoxWrapperRowStyled = styled(BoxWrapperRow)(() => ({
   borderBottom: '1px solid #B6B6B6',
 }))
 
-import useMediaQuery from '@mui/material/useMediaQuery'
 export const Modal = (props: ModalProps) => {
-  const { open, handleClose } = props
+  const { position, open, handleClose } = props
 
   const hiddenStepper = useMediaQuery((theme: any) => theme.breakpoints.down('md'))
 
@@ -68,7 +70,7 @@ export const Modal = (props: ModalProps) => {
               gap={2}
             >
               <BoxWrapper>
-                <SetupDetails />
+                <SetupDetails position={position} />
                 <TransactionDetails />
                 <TransactionCheck />
                 <Tenderly />

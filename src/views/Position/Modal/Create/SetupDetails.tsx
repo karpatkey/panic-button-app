@@ -18,7 +18,7 @@ import CustomTypography from 'src/components/CustomTypography'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import { useApp } from 'src/contexts/app.context'
-import { Strategy } from 'src/contexts/state'
+import { Position, Strategy } from 'src/contexts/state'
 import { formatPercentage } from 'src/utils/format'
 import { shortenAddress } from 'src/utils/string'
 
@@ -61,7 +61,7 @@ const LABEL_MAPPER = {
   },
 }
 
-export const SetupDetails = () => {
+export const SetupDetails = ({ position }: { position: Position }) => {
   const { state } = useApp()
 
   const createValue = state?.setup?.create?.value || {}
@@ -104,8 +104,24 @@ export const SetupDetails = () => {
                   {parameters.map(({ label, value, key }, index) => {
                     if (!value || !label) return null
 
-                    let valueToDisplay = null
-                    if (key === 'percentage' || key === 'max_slippage') {
+                    let valueToDisplay: any = null
+                    if (key === 'percentage') {
+                      valueToDisplay = (
+                        <>
+                          <div>{formatPercentage(+value / 100)}</div>
+                          {(position.tokens || []).map((token: any) => {
+                            if (token.as == 'supply') {
+                              return (
+                                <>
+                                  <br />
+                                  {`${token.symbol} ${token.amount * (+value / 100)}`}
+                                </>
+                              )
+                            }
+                          })}
+                        </>
+                      )
+                    } else if (key === 'max_slippage') {
                       valueToDisplay = formatPercentage(+value / 100)
                     } else if (key === 'token_out_address') {
                       valueToDisplay = (
