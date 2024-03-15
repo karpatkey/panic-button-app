@@ -1,3 +1,4 @@
+import { SxProps } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import { FOOTER_HEIGHT } from 'src/components/Layout/Footer'
 import { HEADER_HEIGHT } from 'src/components/Layout/Header'
@@ -5,6 +6,8 @@ import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 
 interface LoadingProps {
   fullPage?: boolean
+  sx?: SxProps
+  size?: number | string
 }
 
 const Loading = (props: LoadingProps) => {
@@ -15,9 +18,10 @@ const Loading = (props: LoadingProps) => {
         justifyContent: 'center',
         alignItems: 'center',
         minHeight,
+        ...(props.sx || {}),
       }}
     >
-      <CircularProgress color="primary" />
+      <CircularProgress color="primary" size={props.size} />
     </BoxWrapperColumn>
   )
 }
