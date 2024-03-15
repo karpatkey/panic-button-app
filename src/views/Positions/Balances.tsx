@@ -11,30 +11,57 @@ interface ListItemsProps {
   tokens: Token[] | undefined
 }
 
-export const Balances = ({ tokens }: ListItemsProps) => {
+type TokenGroup = 'supply' | 'borrow' | 'reward' | 'other'
+
+type GroupedTokens = {
+  [name in TokenGroup]: Token[]
+}
+
+const BalanceGroup = ({ name, tokens }: { name: TokenGroup; tokens: Token[] }) => {
   return (
     <BoxWrapperColumn sx={{ gap: 2 }}>
-      {tokens?.map((token: Token, index: number) => {
-        const { symbol, amount, as, price } = token
+      <BoxWrapperRow sx={{ justifyContent: 'flex-end' }}>
+        <Title title={name} sx={{ fontSize: '0.9rem', fontWeight: '600' }} />
+      </BoxWrapperRow>
+      <Divider sx={{ borderBottomWidth: 5 }} />
+      {tokens.map((token: Token) => {
+        const { symbol, amount, price } = token
         return (
-          <Box key={index}>
+          <Box key={symbol}>
             <BoxWrapperColumn gap={1}>
-              <BoxWrapperRow gap={1} sx={{ justifyContent: 'flex-start' }}>
-                <CryptoIcon symbol={symbol} />
-                <Title title={symbol} />
-              </BoxWrapperRow>
-              <Divider sx={{ borderBottomWidth: 5 }} />
-            </BoxWrapperColumn>
-            <BoxWrapperColumn key={index} gap={1}>
               <BoxWrapperRow sx={{ justifyContent: 'space-between' }}>
-                <Title title={as} />
+                <BoxWrapperRow gap={1}>
+                  <CryptoIcon symbol={symbol} />
+                  <Title title={symbol} />
+                </BoxWrapperRow>
                 <AmountValue value={amount} />
+                <USD value={amount * price} />
               </BoxWrapperRow>
-              <USD value={amount * price} />
               <Divider />
             </BoxWrapperColumn>
           </Box>
         )
+      })}
+    </BoxWrapperColumn>
+  )
+}
+
+export const Balances = ({ tokens }: ListItemsProps) => {
+  const groups = (tokens || []).reduce(
+    (acc: GroupedTokens, token) => {
+      acc[token.as].push(token)
+      return acc
+    },
+    { supply: [], borrow: [], reward: [], other: [] },
+  )
+
+  const ordered: TokenGroup[] = ['supply', 'borrow', 'reward', 'other']
+
+  return (
+    <BoxWrapperColumn sx={{ gap: 2 }}>
+      {ordered.map((name) => {
+        const tokens = groups[name]
+        return tokens.length > 0 ? <BalanceGroup key={name} name={name} tokens={tokens} /> : null
       })}
     </BoxWrapperColumn>
   )
