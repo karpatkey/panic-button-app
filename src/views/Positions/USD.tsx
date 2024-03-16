@@ -25,7 +25,6 @@ export const USD = ({ value }: USDProps) => {
         lineHeight: '14px',
         color: 'custom.grey.dark',
         letterSpacing: '-0.02em',
-        // textAlign: 'end',
       }}
     >
       {formattedValue}
