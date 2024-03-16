@@ -7,6 +7,7 @@ import { slug } from 'src/utils/string'
 import PositionName from 'src/views/Positions/PositionName'
 import ProtocolIcon from 'src/views/Positions/ProtocolIcon'
 import { Title } from 'src/views/Positions/Title'
+import { USD } from 'src/views/Positions/USD'
 import { Balances } from './Balances'
 
 interface PositionProps {
@@ -35,6 +36,7 @@ const Card = (props: PositionProps) => {
         <BoxWrapperRow sx={{ justifyContent: 'space-between' }}>
           <BoxWrapperColumn gap={1}>
             <Title title={dao} />
+            <USD value={position.usd_amount} />
           </BoxWrapperColumn>
           <BoxWrapperRow gap={1}>
             <CryptoIcon size={25} symbol={blockchainSymbol || ''} />
