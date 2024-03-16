@@ -68,6 +68,7 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
         const lptokenName = lptokenNameFromPosition(position)
         return {
           debank: position,
+          usd_amount: position.usd_amount,
           wallet: position.wallet,
           pool_id: position.pool_id,
           protocol: position.protocol_name,
