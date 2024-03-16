@@ -20,6 +20,7 @@ export type Position = {
   blockchain: string
   lptoken_address: string
   lptokenName: string
+  usd_amount: number
   tokens?: Token[]
 }
 

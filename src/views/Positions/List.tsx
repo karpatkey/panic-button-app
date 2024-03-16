@@ -39,11 +39,11 @@ const List = () => {
         ? positionsWithStrategies.filter((position) => position.dao == dao)
         : positionsWithStrategies
 
-    const sorter = (a: any, b: any) => {
+    const sorter = (a: PositionWithStrategies, b: PositionWithStrategies) => {
       if (a.isActive && !b.isActive) return -1
       if (!a.isActive && b.isActive) return 1
 
-      return a.usd_amount - b.usd_amount
+      return b.usd_amount - a.usd_amount
     }
 
     if (queryTerms.length == 0) {
