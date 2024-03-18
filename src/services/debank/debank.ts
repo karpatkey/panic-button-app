@@ -8,8 +8,8 @@ function wait(delay: number) {
 
 const MAX_RETRIES = 3
 function retryBackoff(retriesLeft: number) {
-  const randomPart = (Math.floor(Math.random() * 3) + 1) * 100
-  const extraSecondPerRetry = (MAX_RETRIES - retriesLeft) * 1000
+  const randomPart = (Math.floor(Math.random() * 10) + 1) * 50
+  const extraSecondPerRetry = (1 + MAX_RETRIES - retriesLeft) * 1000
   return extraSecondPerRetry + randomPart
 }
 
@@ -27,7 +27,7 @@ async function getDebank(path: string, retriesLeft: number = MAX_RETRIES) {
   } catch (error) {
     if (retriesLeft > 0) {
       const backoff = retryBackoff(retriesLeft)
-      console.log(`Retrying Debank call ${path} in ${Math.round(backoff / 1000)}ms`)
+      console.log(`Retrying Debank call ${path} in ${Math.round(backoff)}ms`)
       await wait(backoff)
       return await getDebank(path, retriesLeft - 1)
     } else {
