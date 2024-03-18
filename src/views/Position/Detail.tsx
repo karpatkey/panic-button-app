@@ -7,6 +7,7 @@ import Form from 'src/views/Position/Form/Form'
 import NoStrategies from 'src/views/Position/NoStrategies'
 import Primary from 'src/views/Position/Title/Primary'
 import Secondary from 'src/views/Position/Title/Secondary'
+import { USD } from 'src/views/Positions/USD'
 
 const Detail = ({ position }: { position: Position }) => {
   const { state } = useApp()
@@ -36,13 +37,17 @@ const Detail = ({ position }: { position: Position }) => {
     >
       <BoxWrapperColumn gap={2}>
         <BoxWrapperColumn gap={1}>
-          <Primary title={'Overview'} />
+          <Primary title="Overview" />
           <Divider sx={{ borderBottomWidth: 5 }} />
         </BoxWrapperColumn>
         <BoxWrapperColumn gap={2}>
-          <Secondary title={`Blockchain:`} subtitle={position?.blockchain} />
-          <Secondary title={`Protocol:`} subtitle={position?.protocol} />
-          <Secondary title={`Position:`} subtitle={position?.lptokenName} />
+          <Secondary title="DAO:" subtitle={position?.dao} />
+          <Secondary title="Blockchain:" subtitle={position?.blockchain} />
+          <Secondary title="Protocol:" subtitle={position?.protocol} />
+          <Secondary title="Position:" subtitle={position?.lptokenName} />
+          <Secondary title="USD Amount:">
+            <USD value={position?.usd_amount} />
+          </Secondary>
         </BoxWrapperColumn>
       </BoxWrapperColumn>
       <BoxWrapperColumn gap={2}>
