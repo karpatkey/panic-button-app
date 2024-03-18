@@ -4,7 +4,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { useMemo } from 'react'
 
 export default function Provider({ children }: { children: React.ReactNode }) {
-  const [queryClient, persister] = useMemo(() => {
+  const [queryClient, persisterOptions] = useMemo(() => {
     const qc = new QueryClient({
       defaultOptions: {
         queries: {
@@ -18,11 +18,11 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     const persister = createSyncStoragePersister({
       storage: window.localStorage,
     })
-    return [qc, persister]
+    return [qc, { persister }]
   }, [])
 
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={persisterOptions}>
       {children}
     </PersistQueryClientProvider>
   )
