@@ -67,7 +67,6 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
       .map((position: any) => {
         const lptokenName = lptokenNameFromPosition(position)
         return {
-          debank: position,
           usd_amount: position.usd_amount,
           wallet: position.wallet,
           pool_id: position.pool_id,
@@ -80,7 +79,7 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
           dao,
         }
       })
-      .filter((p: any) => p.debank.usd_amount > MIN_USD_AMOUNT)
+      .filter((p: any) => p.usd_amount > MIN_USD_AMOUNT)
   })
 
   return { data }
