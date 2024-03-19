@@ -6,7 +6,7 @@ export async function getPositions(daos: string[]) {
   try {
     return await debankAdapter().getPositions(daos)
   } catch (e) {
-    console.error('No positions data source working or configured properly', e)
+    console.error('Debank error:', e)
     return dwAdapter().getPositions(daos)
   }
 }
