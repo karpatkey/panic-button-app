@@ -34,10 +34,7 @@ const Card = (props: PositionProps) => {
         }}
       >
         <BoxWrapperRow sx={{ justifyContent: 'space-between' }}>
-          <BoxWrapperColumn gap={1}>
-            <Title title={dao} />
-            <USD value={position.usd_amount} />
-          </BoxWrapperColumn>
+          <Title title={dao} />
           <BoxWrapperRow gap={1}>
             <CryptoIcon size={25} symbol={blockchainSymbol || ''} />
             <ProtocolIcon protocol={protocol} />
@@ -45,7 +42,10 @@ const Card = (props: PositionProps) => {
           </BoxWrapperRow>
         </BoxWrapperRow>
         <BoxWrapperColumn gap={1}>
-          <PositionName position={lptokenName} />
+          <BoxWrapperRow gap={1} sx={{ justifyContent: 'space-between' }}>
+            <PositionName position={lptokenName} />
+            <USD value={position.usd_amount} />
+          </BoxWrapperRow>
         </BoxWrapperColumn>
         <Balances tokens={tokens} />
       </BoxWrapperColumn>
