@@ -52,7 +52,7 @@ const WrapperPositions = () => {
 
   const updateUrl = useDebounceCallback((uri) => {
     router.push(uri)
-  }, 800)
+  }, 200)
 
   const handleSearch = useCallback(
     (term: string) => {
