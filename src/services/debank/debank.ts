@@ -107,9 +107,12 @@ function transformEntry(wallet: string, entry: any) {
 }
 
 export async function getPositions(wallets: string[]) {
-  const processWallet = (wallet: string) =>
-    getDebankWalletData(wallet).then((data) => transformData(wallet, data))
-  const data = await Promise.all(wallets.flatMap(processWallet))
-
-  return data
+  const processWallet = async (wallet: string) => {
+    const data = await getDebankWalletData(wallet)
+    if (data.message) {
+      throw new Error(data.message)
+    }
+    return transformData(wallet, data)
+  }
+  return await Promise.all(wallets.flatMap(processWallet))
 }
