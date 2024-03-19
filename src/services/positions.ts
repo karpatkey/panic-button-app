@@ -2,12 +2,21 @@ import { daoWallets } from 'src/config/constants'
 import * as debank from 'src/services/debank/debank'
 import { DataWarehouse } from 'src/services/dwh/dataWarehouse'
 
-export async function getPositions(daos: string[]) {
+interface PositionsResponse {
+  data: Position[]
+  error?: string
+}
+
+export async function getPositions(daos: string[]): Promise<PositionsResponse> {
   try {
     return await debankAdapter().getPositions(daos)
   } catch (e) {
-    console.error('Debank error:', e)
-    return dwAdapter().getPositions(daos)
+    console.error('Positions error:', e)
+    // return dwAdapter().getPositions(daos)
+    if (e instanceof Error) {
+      e = e.message
+    }
+    return { error: e as string, data: [] }
   }
 }
 
@@ -94,6 +103,7 @@ function debankAdapter() {
   return { getPositions: getDebankPositions, enabled: () => true } as Adapter
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function dwAdapter() {
   try {
     return DataWarehouse.getInstance()

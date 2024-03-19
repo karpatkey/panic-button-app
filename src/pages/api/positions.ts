@@ -3,8 +3,8 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { getPositions } from 'src/services/positions'
 
 type Status = {
-  data?: Maybe<any>
-  error?: Maybe<string>
+  data?: any
+  error?: string
 }
 
 export default withApiAuthRequired(async function handler(
@@ -46,7 +46,7 @@ export default withApiAuthRequired(async function handler(
       return res.status(500).json({ error })
     }
 
-    return res.status(200).json(data)
+    return res.status(200).json({ data, error })
   } catch (error) {
     console.error('ERROR Reject: ', error)
   }

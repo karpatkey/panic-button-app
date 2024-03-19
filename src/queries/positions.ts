@@ -8,14 +8,14 @@ export function usePositions() {
   const { user } = useUser()
 
   return useQuery<Position[]>({
-    queryKey: ['positions', user?.sub],
+    queryKey: ['positions/v2', user?.sub],
     queryFn: async () => {
       const res = await fetch('/api/positions')
       const body = await res.json()
       if (!body || body.error) {
         throw new Error(body.error)
       }
-      return body
+      return body.data
     },
   })
 }
