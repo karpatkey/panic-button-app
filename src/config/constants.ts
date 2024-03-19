@@ -79,11 +79,6 @@ export const DAO_LIST: DAO[] = [
     sinceMonth: 7,
     sinceYear: 2023,
     addresses: [
-      // TODO: update theses addresses
-      {
-        address: '0x3e40d73eb977dc6a537af587d48316fee66e9c8c',
-        chainId: 1,
-      },
       {
         address: '0x4971DD016127F390a3EF6b956Ff944d0E2e1e462',
         chainId: 1,
