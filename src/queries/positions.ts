@@ -10,6 +10,9 @@ export function usePositions() {
   return useQuery<Position[]>({
     queryKey: ['positions/v2', user?.sub],
     queryFn: async () => {
+      if (!user) {
+        return []
+      }
       const res = await fetch('/api/positions')
       const body = await res.json()
       if (!body || body.error) {
