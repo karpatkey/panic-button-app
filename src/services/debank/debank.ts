@@ -106,7 +106,7 @@ function transformEntry(wallet: string, entry: any) {
       protocol_name,
       lptoken_name,
       tokens,
-      updated_at: i.updated_at,
+      updated_at: i.update_at * 1000,
     }
   })
 }
