@@ -70,12 +70,14 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
     dwallets.flatMap(({ dao, wallets }) => wallets.map((wallet) => [wallet, dao])),
   )
 
-  const data = walletPositions.flatMap((walletPosition) => {
+  const data = walletPositions.flatMap((walletPosition: any) => {
     const dao = walletDao.get(walletPosition.wallet)
-    return walletPosition.positions
+
+    const positions = walletPosition.positions
       .map((position: any) => {
         const lptokenName = lptokenNameFromPosition(position)
         return {
+          dao,
           usd_amount: position.usd_amount,
           wallet: position.wallet,
           pool_id: position.pool_id,
@@ -85,10 +87,46 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
           blockchain: position.chain,
           tokens: position.tokens,
           updated_at: position.updated_at,
-          dao,
         }
       })
       .filter((p: any) => p.usd_amount > MIN_USD_AMOUNT)
+
+    const tokens = walletPosition.tokens
+      .map((t: any) => {
+        return {
+          dao,
+          usd_amount: t.price * t.amount,
+          positionType: 'token',
+          pool_id: t.id,
+          blockchain: t.chain,
+          protocol: t.protocol_id,
+          lptokenName: t.symbol,
+          tokens: [
+            {
+              symbol: t.symbol,
+              as: 'core',
+              amount: t.amount,
+              price: t.price,
+            },
+          ],
+          // "name": "Chi Gastoken by 1inch",
+          // "symbol": "CHI",
+          // "display_symbol": null,
+          // "optimized_symbol": "CHI",
+          // "decimals": 0,
+          // "logo_url": "https://static.debank.com/image/eth_token/logo_url/0x0000000000004946c0e9f43f4dee607b0ef1fa1c/5d763d01aae3f0ac9a373564026cb620.png",
+          // "protocol_id": "1inch",
+          // "price": 0,
+          // "is_core": true,
+          // "is_wallet": true,
+          // "time_at": 1590352004,
+          // "amount": 3,
+          // "raw_amount": 3
+        }
+      })
+      .filter((p: any) => p.usd_amount > MIN_USD_AMOUNT)
+
+    return positions.concat(tokens)
   })
 
   return { data }
