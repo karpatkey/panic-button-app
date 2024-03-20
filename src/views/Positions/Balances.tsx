@@ -11,7 +11,7 @@ interface ListItemsProps {
   tokens: Token[] | undefined
 }
 
-type TokenGroup = 'supply' | 'borrow' | 'reward' | 'other'
+type TokenGroup = 'supply' | 'borrow' | 'reward' | 'other' | 'core'
 
 type GroupedTokens = {
   [name in TokenGroup]: Token[]
@@ -49,13 +49,14 @@ const BalanceGroup = ({ name, tokens }: { name: TokenGroup; tokens: Token[] }) =
 export const Balances = ({ tokens }: ListItemsProps) => {
   const groups = (tokens || []).reduce(
     (acc: GroupedTokens, token) => {
+      console.log(token.as)
       acc[token.as].push(token)
       return acc
     },
-    { supply: [], borrow: [], reward: [], other: [] },
+    { supply: [], borrow: [], reward: [], other: [], core: [] },
   )
 
-  const ordered: TokenGroup[] = ['supply']
+  const ordered: TokenGroup[] = ['supply', 'core']
 
   return (
     <BoxWrapperColumn sx={{ gap: 2 }}>

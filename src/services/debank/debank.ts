@@ -17,6 +17,10 @@ async function getDebankWalletData(wallet: string) {
   return await getDebank(`/v1/user/all_complex_protocol_list?id=${wallet}`)
 }
 
+async function getDebankTokensData(wallet: string) {
+  return await getDebank(`/v1/user/all_token_list?isAll=false&id=${wallet}`)
+}
+
 async function getDebank(path: string, retriesLeft: number = MAX_RETRIES) {
   try {
     const url = `https://pro-openapi.debank.com${path}`
@@ -36,9 +40,10 @@ async function getDebank(path: string, retriesLeft: number = MAX_RETRIES) {
   }
 }
 
-async function transformData(wallet: string, data: any) {
+async function transformData(wallet: string, positions: any, tokens: any) {
   return {
-    positions: data.flatMap((i: any) => transformEntry(wallet, i)),
+    positions: positions.flatMap((i: any) => transformEntry(wallet, i)),
+    tokens: tokens,
     wallet: wallet,
   }
 }
@@ -108,11 +113,12 @@ function transformEntry(wallet: string, entry: any) {
 
 export async function getPositions(wallets: string[]) {
   const processWallet = async (wallet: string) => {
-    const data = await getDebankWalletData(wallet)
-    if (data.message) {
-      throw new Error(data.message)
+    const protocols = await getDebankWalletData(wallet)
+    const tokens = await getDebankTokensData(wallet)
+    if (protocols.message || tokens.message) {
+      throw new Error(protocols.message || tokens.message)
     }
-    return transformData(wallet, data)
+    return transformData(wallet, protocols, tokens)
   }
   return await Promise.all(wallets.flatMap(processWallet))
 }

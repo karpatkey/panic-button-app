@@ -7,7 +7,7 @@ export enum Status {
 
 export type Token = {
   symbol: string
-  as: 'supply' | 'borrow' | 'reward' | 'other'
+  as: 'supply' | 'borrow' | 'reward' | 'other' | 'core'
   amount: number
   price: number
   // updatedAt: number
