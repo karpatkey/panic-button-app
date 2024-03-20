@@ -14,10 +14,9 @@ export const AmountsPreviewFromPercentage = ({
       {(position.tokens || []).map((token: any) => {
         if (token.as == 'supply') {
           return (
-            <>
-              <br />
+            <span key={token.symbol}>
               {`${token.symbol} ${token.amount * (+percentage / 100)}`}
-            </>
+            </span>
           )
         }
       })}
