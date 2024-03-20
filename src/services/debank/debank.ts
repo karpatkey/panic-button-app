@@ -113,8 +113,10 @@ function transformEntry(wallet: string, entry: any) {
 
 export async function getPositions(wallets: string[]) {
   const processWallet = async (wallet: string) => {
-    const protocols = await getDebankWalletData(wallet)
-    const tokens = await getDebankTokensData(wallet)
+    const protocolsP = getDebankWalletData(wallet)
+    const tokensP = getDebankTokensData(wallet)
+    const protocols = await protocolsP
+    const tokens = await tokensP
     if (protocols.message || tokens.message) {
       throw new Error(protocols.message || tokens.message)
     }
