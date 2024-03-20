@@ -22,7 +22,7 @@ const Secondary = ({ title, subtitle, children }: TitleSecondaryProps) => {
       >
         {title}
       </CustomTypography>
-      {subtitle || children ? (
+      {subtitle ? (
         <CustomTypography
           sx={{
             fontWeight: 700,
@@ -36,6 +36,7 @@ const Secondary = ({ title, subtitle, children }: TitleSecondaryProps) => {
           {subtitle || children}
         </CustomTypography>
       ) : null}
+      {children ? children : null}
     </BoxWrapperRow>
   )
 }
