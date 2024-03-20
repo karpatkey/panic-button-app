@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useCallback, useState } from 'react'
 
 const WITH_EXT = new Map<string, string>([
   ['aurabal', 'webp'],
@@ -19,5 +20,9 @@ export default function CryptoIcon({ symbol, size }: { symbol: string; size?: nu
   name = SYMLINK.get(name) || name
   const s = size || 16
   const ext = WITH_EXT.get(name) || 'svg'
-  return <Image src={`/images/crypto/color/${name}.${ext}`} width={s} height={s} alt={symbol} />
+  const [src, setSrc] = useState(`/images/crypto/color/${name}.${ext}`)
+  const fallback = useCallback(() => {
+    setSrc('/images/protocols/default.svg')
+  }, [])
+  return <Image src={src} onError={fallback} width={s} height={s} alt={symbol} />
 }
