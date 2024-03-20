@@ -30,6 +30,14 @@ interface CustomFormProps {
   position: Position
 }
 
+function isActive(strategy: PositionConfig, config: PositionConfig[]) {
+  if (strategy.stresstest) return true
+  const all = new Map(config.map((s) => [s.label.toLowerCase(), s.stresstest]))
+  const recoveryModeSufix = ' (recovery mode)'
+  const base = strategy.label.toLowerCase().replace(recoveryModeSufix, '')
+  return all.get(base) || all.get(base + recoveryModeSufix) || false
+}
+
 const CustomForm = (props: CustomFormProps) => {
   const { handleClickOpen, position } = props
 
@@ -159,7 +167,7 @@ const CustomForm = (props: CustomFormProps) => {
                   return {
                     name: item.label,
                     value: item.function_name.trim(),
-                    disabled: !item.stresstest,
+                    disabled: !isActive(item, positionConfig),
                     description: item.description,
                   }
                 })}

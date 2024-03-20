@@ -49,7 +49,6 @@ const BalanceGroup = ({ name, tokens }: { name: TokenGroup; tokens: Token[] }) =
 export const Balances = ({ tokens }: ListItemsProps) => {
   const groups = (tokens || []).reduce(
     (acc: GroupedTokens, token) => {
-      console.log(token.as)
       acc[token.as].push(token)
       return acc
     },
