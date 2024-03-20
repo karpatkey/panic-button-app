@@ -77,24 +77,35 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
       .map((position: any) => {
         const lptokenName = lptokenNameFromPosition(position)
         return {
+          ...position,
           dao,
-          usd_amount: position.usd_amount,
-          wallet: position.wallet,
-          pool_id: position.pool_id,
           protocol: position.protocol_name,
           positionType: position.position_type,
           lptokenName: position.lptoken_name || lptokenName,
           blockchain: position.chain,
-          tokens: position.tokens,
-          updated_at: position.updated_at,
         }
       })
       .filter((p: any) => p.usd_amount > MIN_USD_AMOUNT)
 
+    const updated_at = +new Date()
     const tokens = walletPosition.tokens
       .map((t: any) => {
         return {
+          // "name": "Chi Gastoken by 1inch",
+          // "symbol": "CHI",
+          // "display_symbol": null,
+          // "optimized_symbol": "CHI",
+          // "decimals": 0,
+          // "logo_url": "https://static.debank.com/image/eth_token/logo_url/0x0000000000004946c0e9f43f4dee607b0ef1fa1c/5d763d01aae3f0ac9a373564026cb620.png",
+          // "protocol_id": "1inch",
+          // "price": 0,
+          // "is_core": true,
+          // "is_wallet": true,
+          // "time_at": 1590352004,
+          // "amount": 3,
+          // "raw_amount": 3
           dao,
+          updated_at,
           usd_amount: t.price * t.amount,
           positionType: 'token',
           pool_id: t.id,
@@ -109,19 +120,6 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
               price: t.price,
             },
           ],
-          // "name": "Chi Gastoken by 1inch",
-          // "symbol": "CHI",
-          // "display_symbol": null,
-          // "optimized_symbol": "CHI",
-          // "decimals": 0,
-          // "logo_url": "https://static.debank.com/image/eth_token/logo_url/0x0000000000004946c0e9f43f4dee607b0ef1fa1c/5d763d01aae3f0ac9a373564026cb620.png",
-          // "protocol_id": "1inch",
-          // "price": 0,
-          // "is_core": true,
-          // "is_wallet": true,
-          // "time_at": 1590352004,
-          // "amount": 3,
-          // "raw_amount": 3
         }
       })
       .filter((p: any) => p.usd_amount > MIN_USD_AMOUNT)

@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import TimeAgo from 'react-timeago'
 import CryptoIcon from 'src/components/CryptoIcon'
+import CustomTypography from 'src/components/CustomTypography'
 import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import BoxWrapperRow from 'src/components/Wrappers/BoxWrapperRow'
 import { PositionWithStrategies } from 'src/contexts/state'
@@ -13,6 +15,29 @@ import { Balances } from './Balances'
 interface PositionProps {
   id: number
   position: PositionWithStrategies
+}
+
+const SourceUpdated = ({ source, updated_at }: { source: string; updated_at: number | Date }) => {
+  return (
+    <CustomTypography
+      sx={{
+        fontFamily: 'IBM Plex Mono',
+        fontStyle: 'normal',
+        fontWeight: 400,
+        fontSize: '14px',
+        lineHeight: '14px',
+        color: 'custom.grey.dark',
+        letterSpacing: '-0.02em',
+        display: 'flex',
+        flexGrow: 1,
+        alignItems: 'flex-end',
+      }}
+    >
+      <span>
+        from {source} <TimeAgo date={updated_at} />
+      </span>
+    </CustomTypography>
+  )
 }
 
 const Card = (props: PositionProps) => {
@@ -30,7 +55,7 @@ const Card = (props: PositionProps) => {
           width: '100%',
           justifyContent: 'space-between',
           ...(isActive ? { cursor: 'pointer' } : {}),
-          ...(!isActive ? { opacity: '0.2 !important' } : {}),
+          ...(!isActive ? { opacity: '0.2 !important', height: '100%' } : {}),
         }}
       >
         <BoxWrapperRow sx={{ justifyContent: 'space-between' }}>
@@ -48,14 +73,17 @@ const Card = (props: PositionProps) => {
           </BoxWrapperRow>
         </BoxWrapperColumn>
         <Balances tokens={tokens} />
+        <SourceUpdated source="Debank" updated_at={position.updated_at} />
       </BoxWrapperColumn>
     )
   }
 
+  const wrapperStyle = { textDecoration: 'none', display: 'flex', height: '100%' }
+
   return isActive ? (
     <Link
       href={`/positions/${slug(position.dao)}/${position.blockchain}/${position.pool_id}`}
-      style={{ textDecoration: 'none' }}
+      style={wrapperStyle}
     >
       <CardWrapper />
     </Link>

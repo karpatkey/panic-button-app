@@ -21,6 +21,7 @@ export type Position = {
   lptoken_address: string
   lptokenName: string
   usd_amount: number
+  updated_at: number
   tokens?: Token[]
 }
 
