@@ -13,7 +13,18 @@ const WITH_EXT = new Map<string, string>([
   ['ldo', 'webp'],
 ])
 
-const SYMLINK = new Map<string, string>([['weth', 'eth']])
+const SYMLINK = new Map<string, string>([
+  ['weth', 'eth'],
+  ['aave v2', 'aave'],
+  ['aave v3', 'aave'],
+  ['makerdao', 'mkr'],
+  ['xdai_gnosis', 'xdai'],
+  ['gnosis beacon chain', 'gno'],
+  ['compound3', 'comp'],
+  ['compound v3', 'comp'],
+  ['enzyme', 'mln'],
+  ['rocket pool', 'reth'],
+])
 
 export default function CryptoIcon({ symbol, size }: { symbol: string; size?: number }) {
   let name = symbol.toLowerCase()
@@ -24,5 +35,5 @@ export default function CryptoIcon({ symbol, size }: { symbol: string; size?: nu
   const fallback = useCallback(() => {
     setSrc('/images/protocols/default.svg')
   }, [])
-  return <Image src={src} onError={fallback} width={s} height={s} alt={symbol} />
+  return <Image src={src} onError={fallback} width={s} height={s} alt={name} />
 }

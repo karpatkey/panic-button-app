@@ -40,11 +40,22 @@ const SourceUpdated = ({ source, updated_at }: { source: string; updated_at: num
   )
 }
 
+const ChainsInverse = new Map([
+  ['ethereum', 'eth'],
+  ['gnosis', 'gno'],
+  ['polygon', 'matic'],
+  ['arbitrum', 'arb'],
+  ['optimism', 'op'],
+  ['pulse', 'pls'],
+  ['avalanche', 'avax'],
+  ['base', 'bsc'],
+])
+
 const Card = (props: PositionProps) => {
   const { position } = props
   const { protocol, blockchain, lptokenName, dao, isActive, tokens } = position
 
-  const blockchainSymbol = { ethereum: 'eth', gnosis: 'gno' }[blockchain]
+  const blockchainSymbol = ChainsInverse.get(blockchain) || blockchain
 
   const CardWrapper = () => {
     return (
@@ -62,8 +73,12 @@ const Card = (props: PositionProps) => {
           <Title title={dao} />
           <BoxWrapperRow gap={1}>
             <CryptoIcon size={25} symbol={blockchainSymbol || ''} />
-            <ProtocolIcon protocol={protocol} />
-            <Title title={protocol} />
+            {position.positionType !== 'token' ? (
+              <>
+                <ProtocolIcon protocol={protocol} />
+                <Title title={protocol} />
+              </>
+            ) : null}
           </BoxWrapperRow>
         </BoxWrapperRow>
         <BoxWrapperColumn gap={1}>
@@ -78,9 +93,9 @@ const Card = (props: PositionProps) => {
     )
   }
 
-  const wrapperStyle = { textDecoration: 'none', display: 'flex', height: '100%' }
+  const wrapperStyle = { textDecoration: 'none', display: 'flex', flexGrow: 1 }
 
-  return isActive ? (
+  const render = isActive ? (
     <Link
       href={`/positions/${slug(position.dao)}/${position.blockchain}/${position.pool_id}`}
       style={wrapperStyle}
@@ -89,6 +104,31 @@ const Card = (props: PositionProps) => {
     </Link>
   ) : (
     <CardWrapper />
+  )
+
+  return (
+    <>
+      {render}
+
+      {false ? (
+        <CustomTypography
+          sx={{
+            fontFamily: 'IBM Plex Mono',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            fontSize: '10px',
+            lineHeight: '10px',
+            color: 'custom.grey.dark',
+            letterSpacing: '-0.02em',
+            display: 'flex',
+            flexGrow: 1,
+            alignItems: 'flex-end',
+          }}
+        >
+          <pre>{JSON.stringify(position, null, 2)}</pre>
+        </CustomTypography>
+      ) : null}
+    </>
   )
 }
 
