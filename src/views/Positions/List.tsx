@@ -90,6 +90,7 @@ const List = () => {
               border: '1px solid #B6B6B6',
               background: 'background.paper',
               borderRadius: '8px',
+              display: 'flex',
             }}
           >
             <Card id={index} key={index} position={position} />

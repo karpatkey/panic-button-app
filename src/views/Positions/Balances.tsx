@@ -20,10 +20,14 @@ type GroupedTokens = {
 const BalanceGroup = ({ name, tokens }: { name: TokenGroup; tokens: Token[] }) => {
   return (
     <BoxWrapperColumn sx={{ gap: 2 }}>
-      <BoxWrapperRow sx={{ justifyContent: 'flex-end' }}>
-        <Title title={name} sx={{ fontSize: '0.9rem', fontWeight: '600' }} />
-      </BoxWrapperRow>
-      <Divider sx={{ borderBottomWidth: 5 }} />
+      {name !== 'core' ? (
+        <>
+          <BoxWrapperRow sx={{ justifyContent: 'flex-end' }}>
+            <Title title={name} sx={{ fontSize: '0.9rem', fontWeight: '600' }} />
+          </BoxWrapperRow>
+          <Divider sx={{ borderBottomWidth: 5 }} />
+        </>
+      ) : null}
       {tokens.map((token: Token) => {
         const { symbol, amount, price } = token
         return (
@@ -55,7 +59,7 @@ export const Balances = ({ tokens }: ListItemsProps) => {
     { supply: [], borrow: [], reward: [], other: [], core: [] },
   )
 
-  const ordered: TokenGroup[] = ['supply', 'core']
+  const ordered: TokenGroup[] = ['core', 'supply']
 
   return (
     <BoxWrapperColumn sx={{ gap: 2 }}>
