@@ -33,7 +33,7 @@ interface Position {
   dao: string
   protocol: string
   blockchain: string
-  lptoken_address: string
+  pool_id: string
   lptoken_name: string
   tokens?: Token[]
 }
@@ -70,11 +70,11 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
     dwallets.flatMap(({ dao, wallets }) => wallets.map((wallet) => [wallet, dao])),
   )
 
-  const data = walletPositions.flatMap((walletPosition: any) => {
-    const dao = walletDao.get(walletPosition.wallet)
+  const data = walletPositions.flatMap((walletPosition) => {
+    const dao = walletDao.get(walletPosition.wallet) || ''
 
     const positions = walletPosition.positions
-      .map((position: any) => {
+      .map((position) => {
         const lptokenName = lptokenNameFromPosition(position)
         return {
           ...position,
@@ -91,27 +91,14 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
     const tokens = walletPosition.tokens
       .map((t: any) => {
         return {
-          // "name": "Chi Gastoken by 1inch",
-          // "symbol": "CHI",
-          // "display_symbol": null,
-          // "optimized_symbol": "CHI",
-          // "decimals": 0,
-          // "logo_url": "https://static.debank.com/image/eth_token/logo_url/0x0000000000004946c0e9f43f4dee607b0ef1fa1c/5d763d01aae3f0ac9a373564026cb620.png",
-          // "protocol_id": "1inch",
-          // "price": 0,
-          // "is_core": true,
-          // "is_wallet": true,
-          // "time_at": 1590352004,
-          // "amount": 3,
-          // "raw_amount": 3
           dao,
           updated_at,
+          ...t,
           usd_amount: t.price * t.amount,
           positionType: 'token',
           pool_id: t.id,
-          blockchain: t.chain,
           protocol: t.protocol_id,
-          lptokenName: t.symbol,
+          blockchain: t.chain,
           tokens: [
             {
               symbol: t.symbol,
@@ -124,13 +111,25 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
       })
       .filter((p: any) => p.usd_amount > MIN_USD_AMOUNT)
 
-    return positions.concat(tokens)
+    const bareTokens = tokens.filter((token) => {
+      const p = positions.find(
+        (p) => p.pool_id == token.pool_id && p.dao == token.dao && p.chain == token.chain,
+      )
+      if (p) {
+        p.tokens.push(token.tokens[0])
+        return false
+      } else {
+        return true
+      }
+    })
+
+    return positions.concat(bareTokens)
   })
 
   return { data }
 }
 
-function lptokenNameFromPosition(position: Position) {
+function lptokenNameFromPosition(position: debank.ResponsePosition) {
   const symbols = (position.tokens || []).filter((t) => t.as == 'supply').map((t) => t.symbol)
   return symbols.sort().join('+')
 }
