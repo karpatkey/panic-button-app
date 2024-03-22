@@ -7,6 +7,7 @@ import Form from 'src/views/Position/Form/Form'
 import NoStrategies from 'src/views/Position/NoStrategies'
 import Primary from 'src/views/Position/Title/Primary'
 import Secondary from 'src/views/Position/Title/Secondary'
+import { Balances } from 'src/views/Positions/Balances'
 import { USD } from 'src/views/Positions/USD'
 
 const Detail = ({ position }: { position: Position }) => {
@@ -41,14 +42,16 @@ const Detail = ({ position }: { position: Position }) => {
           <Divider sx={{ borderBottomWidth: 5 }} />
         </BoxWrapperColumn>
         <BoxWrapperColumn gap={2}>
-          <Secondary title="DAO:" subtitle={position?.dao} />
-          <Secondary title="Blockchain:" subtitle={position?.blockchain} />
-          <Secondary title="Protocol:" subtitle={position?.protocol} />
-          <Secondary title="Position:" subtitle={position?.lptokenName} />
+          <Secondary title="DAO:" subtitle={position.dao} />
+          <Secondary title="Blockchain:" subtitle={position.blockchain} />
+          <Secondary title="Protocol:" subtitle={position.protocol} />
+          <Secondary title="Position:" subtitle={position.lptokenName} />
           <Secondary title="USD Amount:">
-            <USD value={position?.usd_amount} />
+            <USD value={position.usd_amount} />
           </Secondary>
         </BoxWrapperColumn>
+        <Divider sx={{ borderBottomWidth: 5 }} />
+        <Balances tokens={position.tokens} />
       </BoxWrapperColumn>
       <BoxWrapperColumn gap={2}>
         {areAnyStrategies ? <Form position={position} /> : <NoStrategies />}
