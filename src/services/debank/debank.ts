@@ -27,7 +27,7 @@ async function fetchWallet(wallet: string) {
   const p2 = fetchDebankTokensData(wallet)
   const positions = await p1
   const tokens = await p2
-  return { positions, tokens }
+  return { positions, tokens, updatedAt: +new Date() }
 }
 
 // Switch to this one for run as script in json-builder
@@ -141,10 +141,11 @@ async function transformData(
   wallet: string,
   positions: DebankPosition[],
   tokens: DebankToken[],
+  updatedAt: number,
 ): Promise<DebankFullResponse> {
   return {
     positions: positions.flatMap(transformPosition),
-    tokens: tokens.flatMap(transformToken),
+    tokens: tokens.flatMap(transformToken(updatedAt)),
     wallet: wallet,
   }
 }
@@ -170,9 +171,10 @@ import kitchen_data from './kitchen.json'
 const PositionNamesFromPoolId = new Map(
   kitchen_data.map((d) => [d.lptoken_address, d.lptoken_name]),
 )
-function transformToken(token: DebankToken) {
+const transformToken = (updatedAt: number) => (token: DebankToken) => {
   return {
     ...token,
+    updated_at: updatedAt,
     chain: Chains.get(token.chain) || token.chain,
   }
 }
@@ -212,11 +214,11 @@ function transformPosition(position: DebankPosition): ResponsePosition[] {
 
 export async function getPositions(wallets: string[]) {
   const processWallet = async (wallet: string) => {
-    const { positions, tokens } = await getFromDebank(wallet)
+    const { positions, tokens, updatedAt } = await getFromDebank(wallet)
     if (positions.message || tokens.message) {
       throw new Error(positions.message || tokens.message)
     }
-    return transformData(wallet, positions, tokens)
+    return transformData(wallet, positions, tokens, updatedAt)
   }
   return await Promise.all(wallets.flatMap(processWallet))
 }

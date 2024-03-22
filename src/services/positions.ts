@@ -87,12 +87,10 @@ async function getDebankPositions(daos: string[]): Promise<{ data: Position[] }>
       })
       .filter((p: any) => p.usd_amount > MIN_USD_AMOUNT)
 
-    const updated_at = +new Date()
     const tokens = walletPosition.tokens
       .map((t: any) => {
         return {
           dao,
-          updated_at,
           ...t,
           usd_amount: t.price * t.amount,
           positionType: 'token',
