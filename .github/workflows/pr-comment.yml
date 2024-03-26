@@ -18,7 +18,7 @@ jobs:
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
-          DEPLOYMENT_URL="https://${PR_NUMBER}-panic.karpatkey.dev"
+          DEPLOYMENT_URL="https://${PR_NUMBER}-agile.karpatkey.dev"
           echo "DEPLOYMENT_URL=${DEPLOYMENT_URL}" >> $GITHUB_ENV
 
       - name: Comment on PR
