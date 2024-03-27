@@ -5,6 +5,7 @@ import {
   AccordionSummary,
   Box,
   IconButton,
+  Paper,
   Table,
   TableBody,
   TableCell,
@@ -344,22 +345,26 @@ export const TransactionDetails = () => {
                 }}
               >
                 <CustomTypography variant={'body2'}>Decoded Transaction</CustomTypography>
-                <Box
+                <Paper
+                  variant="outlined"
+                  square
                   sx={{
                     width: '-webkit-fill-available;',
                     overflow: 'auto',
                     maxHeight: '400px',
-                    padding: '16px',
-                    marginTop: '16px',
-                    marginBottom: '16px',
+                    marginTop: '1rem',
+                    marginBottom: '1rem',
+                    fontSize: '0.9em',
+                    lineHeight: '1.5em',
+                    background: '#F5F5F5',
                   }}
                 >
-                  <pre id="json">
+                  <pre>
                     <code>
                       {JSON.stringify(transactionBuildValue?.decodedTransaction, null, 2)}
                     </code>
                   </pre>
-                </Box>
+                </Paper>
               </BoxWrapperColumn>
             )}
 
