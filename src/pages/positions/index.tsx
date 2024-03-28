@@ -6,7 +6,7 @@ import { ReactElement } from 'react'
 import PageLayout from 'src/components/Layout/Layout'
 import { useApp } from 'src/contexts/app.context'
 import { addDAOs, addDaosConfigs } from 'src/contexts/reducers'
-import { getDaosConfigs } from 'src/utils/jsonsFetcher'
+import { Dao, getDaosConfigs } from 'src/services/executor/strategies'
 import WrapperPositions from 'src/views/Positions/WrapperPositions'
 
 interface PositionsPageProps {
@@ -49,13 +49,11 @@ export const getServerSideProps = async (context: {
   }
 
   const user = (session as Session).user
-  const roles = user?.['http://localhost:3000/roles']
+  const daos = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
     : []
 
-  const daos = roles
-
-  const daosConfigs = await getDaosConfigs(daos)
+  const daosConfigs = await getDaosConfigs(daos as Dao[])
 
   return { props: { daos, daosConfigs } }
 }

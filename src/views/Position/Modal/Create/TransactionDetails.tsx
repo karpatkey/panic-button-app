@@ -305,7 +305,7 @@ export const TransactionDetails = () => {
                                     color="inherit"
                                     onClick={() => {
                                       const url =
-                                        formValue?.blockchain === 'Ethereum'
+                                        formValue?.blockchain == 'ethereum'
                                           ? `https://etherscan.io/address/${value}`
                                           : `https://gnosisscan.io/address/${value}`
                                       window.open(url, '_blank')

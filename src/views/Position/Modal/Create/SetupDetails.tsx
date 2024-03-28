@@ -144,8 +144,7 @@ export const SetupDetails = ({ position }: { position: Position }) => {
                               color="inherit"
                               onClick={() => {
                                 const url =
-                                  createValue &&
-                                  (createValue as Strategy)?.blockchain === 'Ethereum'
+                                  createValue && (createValue as Strategy)?.blockchain == 'ethereum'
                                     ? `https://etherscan.io/address/${value}`
                                     : `https://gnosisscan.io/address/${value}`
                                 window.open(url, '_blank')

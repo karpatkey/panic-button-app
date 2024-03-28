@@ -111,7 +111,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       const { MODE, ETHEREUM_RPC_ENDPOINT, GNOSIS_RPC_ENDPOINT } = ENV_NETWORK_DATA
 
       if (MODE === 'production') {
-        const url = blockchain === 'Ethereum' ? ETHEREUM_RPC_ENDPOINT : GNOSIS_RPC_ENDPOINT
+        const url = blockchain == 'ethereum' ? ETHEREUM_RPC_ENDPOINT : GNOSIS_RPC_ENDPOINT
 
         const provider = new ethers.JsonRpcProvider(url)
 
@@ -188,7 +188,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
                 onClick={() => {
                   // open transaction hash in an explorer, if is ethereum in etherscan, if is gnosis in gnosisscan
                   const txUrl =
-                    blockchain === 'Ethereum'
+                    blockchain == 'ethereum'
                       ? `https://etherscan.io/tx/${txHash}`
                       : `https://gnosisscan.io/tx/${txHash}`
                   window.open(txUrl, '_blank')

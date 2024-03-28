@@ -11,7 +11,7 @@ import BoxWrapperColumn from 'src/components/Wrappers/BoxWrapperColumn'
 import { useApp } from 'src/contexts/app.context'
 import { addDaosConfigs, updateEnvNetworkData } from 'src/contexts/reducers'
 import { Position } from 'src/contexts/state'
-import { getDaosConfigs } from 'src/utils/jsonsFetcher'
+import { Dao, getDaosConfigs } from 'src/services/executor/strategies'
 import PositionDetail from 'src/views/Position/WrappedPosition'
 
 interface PositionIndexProps {
@@ -94,11 +94,9 @@ const getServerSideProps = async (context: {
   }
 
   const user = (session as Session).user
-  const roles = user?.['http://localhost:3000/roles']
+  const daos = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
     : []
-
-  const daos = roles
 
   const ENV_NETWORK_DATA = {
     MODE: process?.env?.MODE ?? 'development',
@@ -110,7 +108,7 @@ const getServerSideProps = async (context: {
     LOCAL_FORK_PORT_GNOSIS: process?.env?.LOCAL_FORK_PORT_GNOSIS ?? 8547,
   }
 
-  const daosConfigs = await getDaosConfigs(roles)
+  const daosConfigs = await getDaosConfigs(daos as Dao[])
 
   return {
     props: {

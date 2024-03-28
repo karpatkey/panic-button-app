@@ -1,4 +1,7 @@
 import * as Minio from 'minio'
+import { Dao } from './types'
+
+export { type Dao }
 
 const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT ?? ''
 const MINIO_SECRET_KEY = process.env.MINIO_SECRET_KEY ?? ''
@@ -22,6 +25,24 @@ const DAO_NAME_MAPPER = {
   GnosisGuild: 'Gnosis Guild',
 } as any
 
+export async function getDaosConfigs(daos: Dao[]) {
+  const configs = await cached(fetchJsons)
+
+  if (!configs) {
+    return []
+  }
+
+  return configs
+    .map((f) => ({
+      ...f,
+      dao: DAO_NAME_MAPPER[f.dao] || f.dao,
+      blockchain: mapBlockchain(f.blockchain),
+    }))
+    .filter((f) => {
+      return daos.includes(f.dao)
+    })
+}
+
 function streamBucketToString<T>(stream: Minio.BucketStream<T>): Promise<T[]> {
   const chunks = [] as T[]
   return new Promise<T[]>((resolve, reject) => {
@@ -33,9 +54,8 @@ function streamBucketToString<T>(stream: Minio.BucketStream<T>): Promise<T[]> {
 
 async function fetchJsons(): Promise<File[]> {
   // // Simulate errors :)
-  // if (Math.random() > 0.7) {
-  //   throw new Error('BOOM!')
-  // }
+  // if (Math.random() > 0.7) throw new Error('BOOM!')
+
   const minioClient = new Minio.Client({
     endPoint: MINIO_ENDPOINT,
     accessKey: MINIO_ACCESS_KEY,
@@ -88,7 +108,7 @@ async function refreshCache(fn: () => Promise<Cache>) {
   }
 }
 
-export async function cached(fn: () => Promise<Cache>) {
+async function cached(fn: () => Promise<Cache>) {
   if (CACHE) {
     refreshCache(fn)
   } else {
@@ -97,20 +117,6 @@ export async function cached(fn: () => Promise<Cache>) {
   return CACHE
 }
 
-export async function getDaosConfigs(daos: string[]) {
-  const configs = await cached(fetchJsons)
-
-  if (!configs) {
-    return []
-  }
-
-  return configs
-    .map((f) => ({
-      ...f,
-      dao: DAO_NAME_MAPPER[f.dao] || f.dao,
-      blockchain: f.blockchain.toLowerCase(),
-    }))
-    .filter((f) => {
-      return daos.includes(f.dao)
-    })
+function mapBlockchain(blockchain: string) {
+  return blockchain.toLowerCase()
 }
