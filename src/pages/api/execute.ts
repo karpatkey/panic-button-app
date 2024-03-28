@@ -1,15 +1,17 @@
 import { Session, getSession, withApiAuthRequired } from '@auth0/nextjs-auth0'
-import { ethers } from 'ethers'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import {
-  BLOCKCHAIN,
-  DAO,
-  EXECUTION_TYPE,
+  Blockchain,
+  Dao,
+  ExecutionType,
   getDAOFilePath,
   getStrategyByPositionId,
 } from 'src/config/strategies/manager'
+import { CowswapSigner } from 'src/services/cowswap'
+import { getEthersProvider } from 'src/services/ethers'
+import { getDaosConfigs } from 'src/services/executor/strategies'
+import { Signor } from 'src/services/signer'
 import { CommonExecutePromise } from 'src/utils/execute'
-import { getDaosConfigs } from 'src/utils/jsonsFetcher'
 
 type Status = {
   data?: Maybe<any>
@@ -48,24 +50,26 @@ export default withApiAuthRequired(async function handler(
     blockchain,
     dao = '',
   } = req.body as {
-    execution_type: EXECUTION_TYPE
-    blockchain: Maybe<BLOCKCHAIN>
-    dao: Maybe<DAO>
+    execution_type: ExecutionType
+    blockchain: Maybe<Blockchain>
+    dao: Maybe<Dao>
+    decoded: Maybe<any>
   }
+
+  console.log(req.body)
 
   // Get User role, if not found, return an error
   const user = (session as Session).user
-  const roles = user?.['http://localhost:3000/roles']
+  const daos = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
     : []
 
-  const DAOs = roles
-  if (!DAOs) {
+  if (!daos) {
     res.status(401).json({ error: 'Unauthorized' })
     return
   }
 
-  if (dao && !DAOs.includes(dao)) {
+  if (dao && !daos.includes(dao)) {
     res.status(401).json({ error: 'Unauthorized' })
     return
   }
@@ -87,9 +91,9 @@ export default withApiAuthRequired(async function handler(
     parameters.push(`${blockchain.toUpperCase()}`)
   }
 
-  const daosConfigs = await getDaosConfigs([dao || ''])
+  const daosConfigs = await getDaosConfigs(dao ? [dao] : [])
 
-  const filePath = getDAOFilePath(execution_type as EXECUTION_TYPE)
+  const filePath = getDAOFilePath(execution_type as ExecutionType)
 
   if (execution_type === 'transaction_builder') {
     try {
@@ -135,8 +139,8 @@ export default withApiAuthRequired(async function handler(
       if (protocol) {
         const { positionConfig } = getStrategyByPositionId(
           daosConfigs,
-          dao as DAO,
-          blockchain as unknown as BLOCKCHAIN,
+          dao as Dao,
+          blockchain as unknown as Blockchain,
           pool_id || '',
         )
         const positionConfigItemFound = positionConfig?.find(
@@ -181,63 +185,31 @@ export default withApiAuthRequired(async function handler(
     }
   }
 
-  // TODO remove this labelled break as no one uses this in JS
-  // it's so that we cancel execution with signer if it's not configured
-  // and continues to the "test" execution
-  break_execute: if (execution_type === 'execute') {
+  if (execution_type === 'execute') {
     try {
-      const { transaction } = req.body as {
+      const { transaction, decoded } = req.body as {
         transaction: Maybe<any>
+        decoded: Maybe<any>
       }
 
-      const signerUrl = getSignerUrl(transaction.chainId)
-      if (!signerUrl) {
-        // TODO change this
-        break break_execute
-      }
+      if (!decoded || !transaction) throw new Error('Missing required param')
 
       const provider = getEthersProvider(blockchain)
+      const signor = new Signor(provider)
+      const txResponse = await signor.sendTransaction(transaction)
 
-      if (process.env.MODE == 'development') {
-        // Overwrite transaction so we send transactions
-        // that web3signer is configured for
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        // const priv = require('yaml').parse(
-        //   // eslint-disable-next-line @typescript-eslint/no-var-requires
-        //   require('fs').readFileSync(process.cwd() + '/key.yml', 'utf8')
-        // ).privateKey
-        const priv = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-        const wallet = new ethers.Wallet(priv)
-        const address = wallet.address
-        // delete transaction.chainId
-        transaction.from = address
-        transaction.nonce = await provider.getTransactionCount(wallet.address)
-        console.log('Rewrote transaction', transaction)
+      const txReceipt = await txResponse.wait()
+
+      if (txReceipt?.status == 1) {
+        const cowsigner = new CowswapSigner(blockchain, decoded)
+        if (cowsigner.needsMooofirmation()) {
+          await cowsigner.moooIt()
+        }
+
+        return res.status(200).json({ data: { tx_hash: txResponse.hash } })
+      } else {
+        throw new Error('Failed transaction receipt')
       }
-
-      const id = +new Date()
-      const headers = { 'Content-Type': 'application/json' }
-      const payload = {
-        jsonrpc: '2.0',
-        method: 'eth_signTransaction',
-        params: [transaction],
-        id: id,
-      }
-      const response = await fetch(signerUrl, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(payload),
-      })
-      const signed = await response.json()
-
-      if (signed.error) {
-        throw new Error('Web3Signer Error: ' + JSON.stringify(signed.error))
-      }
-      // console.log('signed TX', signed)
-      const txResponse = await provider.broadcastTransaction(signed.result)
-      // await txResponse.wait()
-
-      return res.status(200).json({ data: { tx_hash: txResponse.hash } })
     } catch (error) {
       console.error('EXECUTION_ERROR: ', error)
       return res.status(500).json({ error: (error as Error)?.message, status: 500 })
@@ -271,62 +243,3 @@ export default withApiAuthRequired(async function handler(
 
   return res.status(500).json({ error: 'Internal Server Error', status: 500 })
 })
-
-function getEthersProvider(blockchain: BLOCKCHAIN) {
-  const { mev, main, fallback } = {
-    Ethereum: {
-      production: {
-        main: process?.env?.ETHEREUM_RPC_ENDPOINT,
-        fallback: process?.env?.ETHEREUM_RPC_ENDPOINT_FALLBACK
-      },
-      development: {
-        main: `http://${process?.env?.LOCAL_FORK_HOST_ETHEREUM}:${process?.env?.LOCAL_FORK_PORT_ETHEREUM}`,
-        fallback: ''
-      },
-      test: {
-        main: '',
-        fallback: ''
-      }
-    },
-    Gnosis: {
-      production: {
-        mev: process?.env?.ETHEREUM_RPC_ENDPOINT_MEV,
-        main: process?.env?.GNOSIS_RPC_ENDPOINT,
-        fallback: process?.env?.GNOSIS_RPC_ENDPOINT_FALLBACK
-      },
-      development: {
-        main: `http://${process?.env?.LOCAL_FORK_HOST_GNOSIS}:${process?.env?.LOCAL_FORK_PORT_GNOSIS}`,
-        fallback: ''
-      },
-      test: {
-        main: '',
-        test: ''
-      }
-    }
-  }[blockchain][(process.env.MODE || 'development') as 'development' | 'production']
-
-  const network = { Ethereum: 1, Gnosis: 100 }[blockchain]
-  const options = [network, { staticNetwork: true }] as [
-    ethers.Networkish,
-    ethers.JsonRpcApiProviderOptions
-  ]
-  // console.log({ main, fallback }, options)
-  const provider = new ethers.FallbackProvider(
-    [mev, main, fallback]
-      .filter((url) => url)
-      .map((url, idx) => ({
-        priority: idx,
-        provider: new ethers.JsonRpcProvider(url, ...options)
-      }))
-  )
-  return provider
-}
-
-function getSignerUrl(chainId: string) {
-  return (
-    {
-      '1': process.env.WEB3SIGNER_ETHEREUM_URL,
-      '100': process.env.WEB3SIGNER_GNOSIS_URL
-    }[chainId] ?? ''
-  )
-}

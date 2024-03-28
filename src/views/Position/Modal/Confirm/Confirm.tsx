@@ -35,6 +35,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
   const { blockchain, dao } = state?.setup?.create?.value ?? {}
   const { transaction, decodedTransaction } = state?.setup?.transactionBuild?.value ?? {}
   const transactionBuildStatus = state?.setup?.transactionBuild?.status ?? null
+  const transactionBuildValue = state?.setup?.transactionBuild?.value ?? null
   const transactionCheckStatus = state?.setup?.transactionCheck?.status ?? null
   const simulationStatus = state?.setup?.simulation?.status ?? null
   const confirmStatus = state?.setup?.confirm?.status ?? null
@@ -78,6 +79,7 @@ export const Confirm = ({ handleClose }: ConfirmProps) => {
       const parameters = {
         execution_type: 'execute',
         transaction: transaction,
+        decoded: transactionBuildValue?.decodedTransaction,
         blockchain,
         dao,
       }
