@@ -1,13 +1,12 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+
+module.exports = {
   output: 'standalone',
   reactStrictMode: true,
   images: {
-    domains: ['agile.karpatkey.com', 'localhost', 'agile.karpatkey.dev']
+    domains: ['agile.karpatkey.com', 'localhost', 'agile.karpatkey.dev'],
   },
   experimental: {
-    externalDir: true
-  }
+    externalDir: true,
+  },
 }
-
-module.exports = nextConfig

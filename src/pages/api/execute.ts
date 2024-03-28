@@ -1,15 +1,17 @@
-import { withApiAuthRequired } from '@auth0/nextjs-auth0'
+import { Session, getSession, withApiAuthRequired } from '@auth0/nextjs-auth0'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getSession, Session } from '@auth0/nextjs-auth0'
 import {
-  BLOCKCHAIN,
-  DAO,
+  Blockchain,
+  Dao,
+  ExecutionType,
   getDAOFilePath,
-  getStrategyByPositionId
+  getStrategyByPositionId,
 } from 'src/config/strategies/manager'
-import { EXECUTION_TYPE } from 'src/config/strategies/manager'
+import { CowswapSigner } from 'src/services/cowswap'
+import { getEthersProvider } from 'src/services/ethers'
+import { getDaosConfigs } from 'src/services/executor/strategies'
+import { Signor } from 'src/services/signer'
 import { CommonExecutePromise } from 'src/utils/execute'
-import { getDaosConfigs } from 'src/utils/jsonsFetcher'
 
 type Status = {
   data?: Maybe<any>
@@ -21,12 +23,12 @@ type Status = {
 const DAO_MAPPER: Record<string, string> = {
   'Gnosis DAO': 'GnosisDAO',
   'Gnosis Ltd': 'GnosisLtd',
-  'karpatkey DAO': 'karpatkey'
+  'karpatkey DAO': 'karpatkey',
 }
 
 export default withApiAuthRequired(async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Status>
+  res: NextApiResponse<Status>,
 ) {
   // Should be a post request
   if (req.method !== 'POST') {
@@ -46,27 +48,34 @@ export default withApiAuthRequired(async function handler(
   const {
     execution_type,
     blockchain,
-    dao = ''
+    dao = '',
   } = req.body as {
-    execution_type: EXECUTION_TYPE
-    blockchain: Maybe<BLOCKCHAIN>
-    dao: Maybe<DAO>
+    execution_type: ExecutionType
+    blockchain: Maybe<Blockchain>
+    dao: Maybe<Dao>
+    decoded: Maybe<any>
   }
+
+  console.log(req.body)
 
   // Get User role, if not found, return an error
   const user = (session as Session).user
-  const roles = user?.['http://localhost:3000/roles']
+  const daos = user?.['http://localhost:3000/roles']
     ? (user?.['http://localhost:3000/roles'] as unknown as string[])
     : []
 
-  const DAOs = roles
-  if (!DAOs) {
+  if (!daos) {
     res.status(401).json({ error: 'Unauthorized' })
     return
   }
 
-  if (dao && !DAOs.includes(dao)) {
+  if (dao && !daos.includes(dao)) {
     res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+
+  if (!blockchain) {
+    res.status(400).json({ error: 'Invalid params' })
     return
   }
 
@@ -82,19 +91,19 @@ export default withApiAuthRequired(async function handler(
     parameters.push(`${blockchain.toUpperCase()}`)
   }
 
-  const daosConfigs = await getDaosConfigs([dao || ''])
+  const daosConfigs = await getDaosConfigs(dao ? [dao] : [])
 
-  const filePath = getDAOFilePath(execution_type as EXECUTION_TYPE)
+  const filePath = getDAOFilePath(execution_type as ExecutionType)
 
   if (execution_type === 'transaction_builder') {
     try {
       // Build de arguments for the transaction builder
 
       // Get the strategy from the body, if not found, return an error
-      const { strategy, percentage, position_id, protocol, exit_arguments } = req.body as {
+      const { strategy, percentage, pool_id, protocol, exit_arguments } = req.body as {
         strategy: Maybe<string>
         percentage: Maybe<number>
-        position_id: Maybe<string>
+        pool_id: Maybe<string>
         protocol: Maybe<string>
         exit_arguments: {
           rewards_address: Maybe<string>
@@ -102,6 +111,10 @@ export default withApiAuthRequired(async function handler(
           token_out_address: Maybe<string>
           bpt_address: Maybe<string>
         }
+      }
+
+      if (!pool_id || !protocol || !strategy) {
+        return res.status(500).json({ status: 500, error: 'Missing params' })
       }
 
       // Add the rest of the parameters if needed
@@ -126,20 +139,19 @@ export default withApiAuthRequired(async function handler(
       if (protocol) {
         const { positionConfig } = getStrategyByPositionId(
           daosConfigs,
-          dao as DAO,
-          blockchain as unknown as BLOCKCHAIN,
-          protocol,
-          position_id as string
+          dao as Dao,
+          blockchain as unknown as Blockchain,
+          pool_id || '',
         )
         const positionConfigItemFound = positionConfig?.find(
-          (positionConfigItem) => positionConfigItem.function_name === strategy
+          (positionConfigItem) => positionConfigItem.function_name === strategy,
         )
 
         positionConfigItemFound?.parameters?.forEach((parameter) => {
           if (parameter.type === 'constant') {
             exitArguments = {
               ...exitArguments,
-              [parameter.name]: parameter.value
+              [parameter.name]: parameter.value,
             }
           }
         })
@@ -151,7 +163,7 @@ export default withApiAuthRequired(async function handler(
         if (value) {
           exitArguments = {
             ...exitArguments,
-            [key]: value
+            [key]: value,
           }
         }
       }
@@ -168,7 +180,38 @@ export default withApiAuthRequired(async function handler(
 
       return res.status(200).json({ data, status, error })
     } catch (error) {
-      console.error('ERROR Reject: ', error)
+      console.error('TRANSACTION_BUILDER_ERROR: ', error)
+      return res.status(500).json({ error: (error as Error)?.message, status: 500 })
+    }
+  }
+
+  if (execution_type === 'execute') {
+    try {
+      const { transaction, decoded } = req.body as {
+        transaction: Maybe<any>
+        decoded: Maybe<any>
+      }
+
+      if (!decoded || !transaction) throw new Error('Missing required param')
+
+      const provider = getEthersProvider(blockchain)
+      const signor = new Signor(provider)
+      const txResponse = await signor.sendTransaction(transaction)
+
+      const txReceipt = await txResponse.wait()
+
+      if (txReceipt?.status == 1) {
+        const cowsigner = new CowswapSigner(blockchain, decoded)
+        if (cowsigner.needsMooofirmation()) {
+          await cowsigner.moooIt()
+        }
+
+        return res.status(200).json({ data: { tx_hash: txResponse.hash } })
+      } else {
+        throw new Error('Failed transaction receipt')
+      }
+    } catch (error) {
+      console.error('EXECUTION_ERROR: ', error)
       return res.status(500).json({ error: (error as Error)?.message, status: 500 })
     }
   }
@@ -193,7 +236,7 @@ export default withApiAuthRequired(async function handler(
 
       return res.status(200).json({ data, error, status })
     } catch (error) {
-      console.error('ERROR Reject: ', error)
+      console.error('EXECUTION_SIMULATION_ERROR: ', error)
       return res.status(500).json({ error: (error as Error)?.message, status: 500 })
     }
   }

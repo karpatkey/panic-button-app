@@ -1,4 +1,4 @@
-export type DAO =
+export type Dao =
   | 'Gnosis DAO'
   | 'Balancer DAO'
   | 'karpatkey DAO'
@@ -6,13 +6,13 @@ export type DAO =
   | 'CoW DAO'
   | 'Gnosis Ltd'
 
-export type BLOCKCHAIN = 'Gnosis' | 'Ethereum'
+export type Blockchain = 'gnosis' | 'ethereum'
 
-export type EXECUTION_TYPE = 'execute' | 'simulate' | 'transaction_builder'
+export type ExecutionType = 'execute' | 'simulate' | 'transaction_builder'
 
-export type DAO_MAPPER_TYPE = {
-  name: DAO
-  blockchain: BLOCKCHAIN
+export type DaoMapperType = {
+  name: Dao
+  blockchain: Blockchain
   config: any
 }
 
@@ -22,7 +22,7 @@ const TRANSACTION_BUILDER_FILE_PATH =
   'roles_royce/roles_royce/applications/execution_app/transaction_builder.py'
 
 export enum DEFAULT_VALUES_KEYS {
-  position_id = 'position_id',
+  dao = 'dao',
   protocol = 'protocol',
   blockchain = 'blockchain',
   strategy = 'strategy',
@@ -30,11 +30,10 @@ export enum DEFAULT_VALUES_KEYS {
   rewards_address = 'rewards_address',
   max_slippage = 'max_slippage',
   token_out_address = 'token_out_address',
-  bpt_address = 'bpt_address'
+  bpt_address = 'bpt_address',
 }
 
 export type DEFAULT_VALUES_TYPE = {
-  [DEFAULT_VALUES_KEYS.position_id]: Maybe<string>
   [DEFAULT_VALUES_KEYS.protocol]: Maybe<string>
   [DEFAULT_VALUES_KEYS.blockchain]: Maybe<string>
   [DEFAULT_VALUES_KEYS.strategy]: Maybe<string>
@@ -50,33 +49,33 @@ export const PARAMETERS_CONFIG: {
     placeholder: string
   }
 } = {
-  [DEFAULT_VALUES_KEYS.position_id]: {
-    placeholder: 'Position ID'
+  [DEFAULT_VALUES_KEYS.dao]: {
+    placeholder: 'Dao',
   },
   [DEFAULT_VALUES_KEYS.protocol]: {
-    placeholder: 'Protocol'
+    placeholder: 'Protocol',
   },
   [DEFAULT_VALUES_KEYS.blockchain]: {
-    placeholder: 'Blockchain'
+    placeholder: 'Blockchain',
   },
   [DEFAULT_VALUES_KEYS.strategy]: {
-    placeholder: 'Strategy'
+    placeholder: 'Strategy',
   },
   [DEFAULT_VALUES_KEYS.percentage]: {
-    placeholder: '0.00%'
+    placeholder: '0.00%',
   },
   [DEFAULT_VALUES_KEYS.rewards_address]: {
-    placeholder: '0x00000'
+    placeholder: '0x00000',
   },
   [DEFAULT_VALUES_KEYS.max_slippage]: {
-    placeholder: '0.00%'
+    placeholder: '0.00%',
   },
   [DEFAULT_VALUES_KEYS.token_out_address]: {
-    placeholder: '0x00000'
+    placeholder: '0x00000',
   },
   [DEFAULT_VALUES_KEYS.bpt_address]: {
-    placeholder: '0x00000'
-  }
+    placeholder: '0x00000',
+  },
 }
 
 export type Config = {
@@ -104,34 +103,33 @@ export type ExecConfig = {
   positionConfig: PositionConfig[]
 }
 
-export const getStrategies = (mapper: any, dao: DAO, blockchain: BLOCKCHAIN) => {
+export const getStrategies = (mapper: any, dao: Dao, blockchain: Blockchain) => {
   const bc = blockchain.toLowerCase()
-  return mapper?.find((daoMapper: any) => daoMapper.dao === dao && daoMapper.blockchain === bc)
+  const d = dao.toLowerCase()
+  return mapper?.find(
+    (daoMapper: any) => daoMapper.dao.toLowerCase() === d && daoMapper.blockchain === bc,
+  )
 }
 
 export const getStrategyByPositionId = (
   daosConfigs: any,
-  dao: DAO,
-  blockchain: BLOCKCHAIN,
-  _protocol: string,
-  positionId: string
+  dao: Dao,
+  blockchain: Blockchain,
+  pool_id: string,
 ) => {
   const daoItem = getStrategies(daosConfigs, dao, blockchain)
 
-  const positionKey = `${positionId}`
-
   const position = daoItem?.positions?.find(
-    (position: any) => position.position_id.toLowerCase() === positionKey.toLowerCase()
+    (position: any) => position.position_id_tech.toLowerCase() === pool_id,
   )
 
   return {
     commonConfig: daoItem?.general_parameters ?? [],
-    positionConfig: position?.exec_config ?? []
+    positionConfig: position?.exec_config ?? [],
   } as ExecConfig
 }
 
-export const getDAOFilePath = (executionType: EXECUTION_TYPE) => {
-  // const DAO_ITEM: DAO_MAPPER_TYPE | undefined = getStrategies(dao, blockchain)
+export const getDAOFilePath = (executionType: ExecutionType) => {
   switch (executionType) {
     case 'execute':
       return EXECUTE_FILE_PATH
